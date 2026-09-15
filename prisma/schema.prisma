@@ -1,0 +1,604 @@
+// SocialPilot AI - Production Database Schema
+// Multi-tenant architecture with workspace-level isolation, idempotency, and security
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  CONTENT_MANAGER
+  DESIGNER
+  CLIENT
+  ANALYST
+}
+
+enum PlatformType {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  X
+  WHATSAPP
+  THREADS
+  PINTEREST
+  YOUTUBE
+  TIKTOK
+}
+
+enum ContentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum ApprovalState {
+  PENDING
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum SubscriptionTier {
+  FREE
+  STARTER
+  PROFESSIONAL
+  AGENCY
+  ENTERPRISE
+}
+
+enum PublishingVerificationStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  UNKNOWN
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+model User {
+  id            String            @id @default(uuid())
+  email         String            @unique
+  passwordHash  String?
+  name          String
+  avatarUrl     String?
+  jobTitle      String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  memberships   WorkspaceMember[]
+  createdPosts  Content[]
+  assignedInbox InboxAssignment[]
+  auditLogs     AuditLog[]
+  comments      ApprovalComment[]
+  notifications Notification[]
+}
+
+model Workspace {
+  id             String            @id @default(uuid())
+  name           String
+  slug           String            @unique
+  logoUrl        String?
+  industry       String?
+  country        String            @default("US")
+  timezone       String            @default("UTC")
+  language       String            @default("en")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  members        WorkspaceMember[]
+  brands         Brand[]
+  socialAccounts SocialAccount[]
+  whatsAppConfig WhatsAppBusinessConfig?
+  contents       Content[]
+  mediaAssets    MediaAsset[]
+  mediaFolders   MediaFolder[]
+  campaigns      Campaign[]
+  conversations  Conversation[]
+  subscription   Subscription?
+  usageRecords   UsageRecord[]
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+  featureFlags   FeatureFlag[]
+}
+
+model WorkspaceMember {
+  id          String     @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        UserRole   @default(CONTENT_MANAGER)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model Brand {
+  id                String          @id @default(uuid())
+  workspaceId       String
+  name              String
+  slug              String
+  logoUrl           String?
+  websiteUrl        String?
+  primaryColor      String          @default("#CEFF1A")
+  secondaryColor    String          @default("#818CF8")
+  tagline           String?
+  description       String?
+  targetAudience    String?
+  brandVoice        String?
+  tone              String?
+  preferredLanguage String          @default("en")
+  prohibitedClaims  String?
+  approvedExamples  String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  workspace         Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contents          Content[]
+  campaigns         Campaign[]
+  knowledgeItems    BrandKnowledge[]
+  socialAccounts    SocialAccount[]
+
+  @@unique([workspaceId, slug])
+}
+
+model BrandKnowledge {
+  id          String   @id @default(uuid())
+  brandId     String
+  category    String
+  title       String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+}
+
+model SocialAccount {
+  id                 String           @id @default(uuid())
+  workspaceId        String
+  brandId            String?
+  platform           PlatformType
+  platformAccountId  String           // E.g. Meta Page ID, LinkedIn Organization URN
+  accountName        String
+  handle             String?
+  avatarUrl          String?
+  accountType        String?          // PAGE, ORGANIZATION, USER
+  
+  // Encrypted OAuth Tokens (AES-256-GCM)
+  encryptedToken     String
+  encryptedSecret    String?
+  tokenIv            String?          // 12-byte IV for AES-256-GCM
+  tokenAuthTag       String?          // 16-byte Auth Tag
+  tokenExpiresAt     DateTime?
+  refreshToken       String?
+  refreshTokenExpiresAt DateTime?
+  tokenStatus        String           @default("ACTIVE") // ACTIVE, EXPIRED, REVOKED
+  lastSyncAt         DateTime?
+  lastRefreshedAt    DateTime?
+  scopes             String[]         @default([])
+  capabilities       String?          // PlatformCapabilities JSON
+  isDemoAccount      Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  workspace          Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brand              Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  contentPlatforms   ContentPlatform[]
+  conversations      Conversation[]
+  analytics          AnalyticsSnapshot[]
+
+  @@unique([workspaceId, platform, platformAccountId])
+}
+
+// Dedicated WhatsApp Cloud API configuration (Separated from Social Feed publishing)
+model WhatsAppBusinessConfig {
+  id                  String       @id @default(uuid())
+  workspaceId         String       @unique
+  phoneNumberId       String
+  wabaId              String       // WhatsApp Business Account ID
+  businessPhoneNumber String
+  encryptedToken      String
+  tokenIv             String?
+  tokenAuthTag        String?
+  webhookVerifyToken  String
+  status              String       @default("ACTIVE")
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  workspace           Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  templates           WhatsAppTemplate[]
+}
+
+model WhatsAppTemplate {
+  id                  String       @id @default(uuid())
+  configId            String
+  metaTemplateId      String
+  name                String
+  language            String       @default("en_US")
+  category            String       // MARKETING, UTILITY, AUTHENTICATION
+  status              String       // APPROVED, PENDING, REJECTED
+  bodyContent         String
+  headerContent       String?
+  buttonsJson         String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  config              WhatsAppBusinessConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@unique([configId, name, language])
+}
+
+model Content {
+  id              String            @id @default(uuid())
+  workspaceId     String
+  brandId         String?
+  creatorId       String?
+  campaignId      String?
+  title           String?
+  basePrompt      String?
+  contentType     String            @default("PROMOTIONAL")
+  status          ContentStatus     @default(DRAFT)
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brand           Brand?            @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  creator         User?             @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  campaign        Campaign?         @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  variants        ContentVariant[]
+  targetPlatforms ContentPlatform[]
+  mediaAssets     MediaAsset[]
+  approvalRequest ApprovalRequest?
+  publishingJobs  PublishingJob[]
+}
+
+model ContentVariant {
+  id             String       @id @default(uuid())
+  contentId      String
+  platform       PlatformType
+  caption        String
+  hashtags       String[]     @default([])
+  ctaText        String?
+  ctaUrl         String?
+  characterCount Int          @default(0)
+  platformMeta   String?      // Custom platform attributes
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  content        Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, platform])
+}
+
+model ContentPlatform {
+  id              String         @id @default(uuid())
+  contentId       String
+  socialAccountId String
+  createdAt       DateTime       @default(now())
+
+  content         Content        @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  socialAccount   SocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, socialAccountId])
+}
+
+model MediaFolder {
+  id          String       @id @default(uuid())
+  workspaceId String
+  name        String
+  parentId    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assets      MediaAsset[]
+}
+
+model MediaAsset {
+  id               String       @id @default(uuid())
+  workspaceId      String
+  folderId         String?
+  contentId        String?
+  filename         String
+  fileUrl          String
+  storagePath      String
+  mimeType         String
+  fileSize         Int
+  width            Int?
+  height           Int?
+  aspectRatio      String?      // "1:1", "16:9", "9:16", "4:5"
+  validationStatus String       @default("VALID") // VALID, INVALID, PENDING
+  validationErrors String[]     @default([])
+  isAiGenerated    Boolean      @default(false)
+  promptUsed       String?
+  tags             String[]     @default([])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  workspace        Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  folder           MediaFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  content          Content?     @relation(fields: [contentId], references: [id], onDelete: SetNull)
+}
+
+model Campaign {
+  id             String         @id @default(uuid())
+  workspaceId    String
+  brandId        String?
+  name           String
+  objective      String?
+  description    String?
+  status         CampaignStatus @default(DRAFT)
+  startDate      DateTime?
+  endDate        DateTime?
+  budgetNotes    String?
+  targetMetrics  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  workspace      Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brand          Brand?         @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  contents       Content[]
+}
+
+model ApprovalRequest {
+  id             String            @id @default(uuid())
+  contentId      String            @unique
+  clientToken    String            @unique
+  tokenExpiresAt DateTime?
+  state          ApprovalState     @default(PENDING)
+  clientName     String?
+  clientEmail    String?
+  reviewedAt     DateTime?
+  decisionNotes  String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  content        Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  comments       ApprovalComment[]
+}
+
+model ApprovalComment {
+  id                String          @id @default(uuid())
+  approvalRequestId String
+  userId            String?
+  authorName        String
+  isExternalClient  Boolean         @default(false)
+  message           String
+  createdAt         DateTime        @default(now())
+
+  approvalRequest   ApprovalRequest @relation(fields: [approvalRequestId], references: [id], onDelete: Cascade)
+  user              User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// Publishing Job with Idempotency & Distributed Worker Lease Locking
+model PublishingJob {
+  id              String              @id @default(uuid())
+  contentId       String
+  idempotencyKey  String              @unique // Prevents duplicate job execution
+  scheduledFor    DateTime
+  status          ContentStatus       @default(SCHEDULED)
+  
+  // Distributed Lease Lock
+  lockedBy        String?             // Worker Instance ID
+  lockedAt        DateTime?
+  leaseExpiresAt  DateTime?
+  
+  retryCount      Int                 @default(0)
+  maxRetries      Int                 @default(3)
+  errorMessage    String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  content         Content             @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  attempts        PublishingAttempt[]
+
+  @@index([status, scheduledFor])
+  @@index([lockedBy, leaseExpiresAt])
+}
+
+model PublishingAttempt {
+  id                 String                       @id @default(uuid())
+  jobId              String
+  platform           PlatformType
+  platformPostId     String?
+  platformPostUrl    String?
+  isSuccess          Boolean                      @default(false)
+  verificationStatus PublishingVerificationStatus @default(PENDING)
+  lastVerifiedAt     DateTime?
+  responseCode       Int?
+  responseBody       String?
+  errorMessage       String?
+  executedAt         DateTime                     @default(now())
+
+  job                PublishingJob                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, platform])
+}
+
+// Inbound Webhook Event Logger with Signature Verification
+model WebhookEvent {
+  id             String        @id @default(uuid())
+  provider       String        // "META", "LINKEDIN", "WHATSAPP"
+  eventId        String?       @unique
+  payload        String        // Raw payload JSON
+  signature      String?
+  status         WebhookStatus @default(PENDING)
+  processedAt    DateTime?
+  errorMessage   String?
+  createdAt      DateTime      @default(now())
+
+  @@index([provider, status])
+}
+
+// Dynamic Feature Flags per Workspace or Global
+model FeatureFlag {
+  id          String     @id @default(uuid())
+  workspaceId String?
+  key         String     // E.g. "FEATURE_LINKEDIN", "FEATURE_WHATSAPP"
+  enabled     Boolean    @default(false)
+  description String?
+  rules       String?    // JSON rules
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([key, workspaceId])
+}
+
+model Conversation {
+  id                 String            @id @default(uuid())
+  workspaceId        String
+  socialAccountId    String
+  externalId         String
+  type               String            @default("COMMENT")
+  customerName       String
+  customerHandle     String?
+  customerAvatarUrl  String?
+  snippet            String
+  isUnread           Boolean           @default(true)
+  isArchived         Boolean           @default(false)
+  sentiment          String?
+  tags               String[]          @default([])
+  lastActivityAt     DateTime          @default(now())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  workspace          Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccount      SocialAccount     @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  messages           Message[]
+  assignment         InboxAssignment?
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderType     String       // CUSTOMER, AGENT, AI_DRAFT
+  senderName     String
+  content        String
+  externalId     String?
+  aiSuggested    Boolean      @default(false)
+  sentAt         DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model InboxAssignment {
+  id             String       @id @default(uuid())
+  conversationId String       @unique
+  userId         String
+  assignedAt     DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnalyticsSnapshot {
+  id              String        @id @default(uuid())
+  socialAccountId String
+  snapshotDate    DateTime
+  impressions     Int           @default(0)
+  reach           Int           @default(0)
+  engagements     Int           @default(0)
+  likes           Int           @default(0)
+  comments        Int           @default(0)
+  shares          Int           @default(0)
+  clicks          Int           @default(0)
+  followers       Int           @default(0)
+  createdAt       DateTime      @default(now())
+
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([socialAccountId, snapshotDate])
+}
+
+model Subscription {
+  id               String           @id @default(uuid())
+  workspaceId      String           @unique
+  tier             SubscriptionTier @default(FREE)
+  provider         String           @default("MOCK") // STRIPE, RAZORPAY, MOCK
+  stripeCustomerId String?
+  stripeSubId      String?
+  razorpaySubId    String?
+  status           String           @default("ACTIVE")
+  currentPeriodEnd DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+// Hard Usage Quota Metering (Prevents Runaway AI API Costs)
+model UsageRecord {
+  id            String    @id @default(uuid())
+  workspaceId   String
+  metricKey     String    // "ai_text_generations", "ai_images", "published_posts", "storage_mb"
+  count         Int       @default(0)
+  limit         Int       @default(1000)
+  recordedMonth String    // "2026-09"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, metricKey, recordedMonth])
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  workspaceId String
+  userId      String?
+  title       String
+  message     String
+  actionUrl   String?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  workspaceId String
+  userId      String?
+  action      String    // E.g. "POST_PUBLISH_ATTEMPT", "ACCOUNT_CONNECTED", "TOKEN_REFRESH", "CLIENT_APPROVED"
+  entityType  String
+  entityId    String
+  metadata    String?   // JSON string
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, action, createdAt])
+}

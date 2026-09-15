@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121A2B"/>
+      <stop offset="1" stop-color="#0B1020"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4FF32" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#C4B5FD" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="wingPrimary" x1="16" y1="46" x2="48" y2="16" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4FF32"/>
+      <stop offset="0.6" stop-color="#E4FF6E"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <linearGradient id="wingSecondary" x1="28" y1="36" x2="48" y2="16" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A5DB00"/>
+      <stop offset="1" stop-color="#D4FF32"/>
+    </linearGradient>
+    <linearGradient id="foldShadow" x1="28" y1="36" x2="33" y2="45" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#739900"/>
+      <stop offset="1" stop-color="#8DBF00"/>
+    </linearGradient>
+    <filter id="glow" x="6" y="6" width="52" height="52" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="64" height="64" rx="16" fill="url(#bgGrad)"/>
+  <rect x="1" y="1" width="62" height="62" rx="15" stroke="url(#borderGrad)" stroke-width="1.5"/>
+
+  <!-- Glowing Jet / Pilot Delta Wing -->
+  <g filter="url(#glow)">
+    <!-- Main Upper Wing -->
+    <path d="M48 16L17 31L28 36L48 16Z" fill="url(#wingPrimary)"/>
+    <!-- Lower Wing Body -->
+    <path d="M48 16L33 47L28 36L48 16Z" fill="url(#wingSecondary)"/>
+    <!-- Fold Keel -->
+    <path d="M28 36V45L32.5 40.5L28 36Z" fill="url(#foldShadow)"/>
+  </g>
+
+  <!-- Signal Broadcast Orbit Dots -->
+  <circle cx="51" cy="13" r="3.5" fill="#D4FF32"/>
+  <circle cx="16" cy="46" r="2.5" fill="#C4B5FD"/>
+  <circle cx="47" cy="49" r="2.5" fill="#C4B5FD"/>
+
+  <!-- Radio Waves -->
+  <path d="M43 9C47.5 11 51 14.5 53 19" stroke="#D4FF32" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.5 2"/>
+</svg>
