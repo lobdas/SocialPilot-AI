@@ -39,7 +39,6 @@ export default function LandingPage() {
     { name: "Facebook", status: "Active Tier 1", color: "#1877F2" },
     { name: "Instagram", status: "Active Tier 1", color: "#E4405F" },
     { name: "X (Twitter)", status: "Staged / In Dev", color: "#FFFFFF" },
-    { name: "WhatsApp Business", status: "Cloud API Staged", color: "#25D366" },
     { name: "Threads", status: "Staged / In Dev", color: "#FFFFFF" },
     { name: "Pinterest", status: "Coming Soon", color: "#BD081C" },
     { name: "YouTube", status: "Coming Soon", color: "#FF0000" },
@@ -143,7 +142,7 @@ export default function LandingPage() {
     },
     {
       title: "Small Businesses",
-      desc: "Maintain active, engaging presence across Instagram, Facebook, and WhatsApp with effortless AI generation.",
+      desc: "Maintain active, engaging presence across Instagram, Facebook, and Threads with effortless AI generation.",
       highlight: "Zero marketing overhead",
     },
     {
@@ -192,7 +191,7 @@ export default function LandingPage() {
         "1,000 AI image generations / mo",
         "Unlimited Brand Brain workspaces",
         "Custom branded client portals",
-        "WhatsApp Business Cloud API",
+        "Priority 24/7 API publishing queues",
       ],
       cta: "Start Free Trial",
     },

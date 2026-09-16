@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Sparkles,
+  Send,
   LayoutDashboard,
   PenTool,
   Calendar,
@@ -32,8 +33,8 @@ import { SocialPilotIcon } from "@/components/ui/logo";
 const NAV_ITEMS = [
   { name: "Overview", href: "/app", icon: LayoutDashboard },
   { name: "AI Content Studio", href: "/app/content-studio", icon: Sparkles, badge: "AI" },
+  { name: "All Posts", href: "/app/posts", icon: Send },
   { name: "Content Calendar", href: "/app/calendar", icon: Calendar },
-  { name: "Media Library", href: "/app/media", icon: ImageIcon },
   { name: "Social Inbox", href: "/app/inbox", icon: Inbox, badgeCount: 2 },
   { name: "Analytics", href: "/app/analytics", icon: BarChart3 },
   { name: "Campaigns", href: "/app/campaigns", icon: Layers },

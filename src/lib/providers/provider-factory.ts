@@ -74,7 +74,6 @@ export class ProviderFactory {
       "INSTAGRAM",
       "LINKEDIN",
       "X",
-      "WHATSAPP",
       "THREADS",
       "PINTEREST",
       "YOUTUBE",

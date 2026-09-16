@@ -32,7 +32,7 @@ Designed with a high-impact **Midnight Intelligence** design system (Deep Navy `
 ## ✨ Core Features
 
 ### 1. 🤖 AI Content Studio & Multichannel Adapter
-- **One-Prompt Multichannel Generation**: Enter a central concept or campaign brief, and the AI automatically adapts voice, tone, character constraints, and hashtag clusters for LinkedIn, Instagram, Facebook, X, Threads, and WhatsApp.
+- **One-Prompt Multichannel Generation**: Enter a central concept or campaign brief, and the AI automatically adapts voice, tone, character constraints, and hashtag clusters for LinkedIn, Instagram, Facebook, X, Threads, and Pinterest.
 - **AI Image & Creative Generation**: Integrated prompt engineering for visual assets with aspect ratio presets (1:1 Square, 4:5 Portrait, 16:9 Landscape, 9:16 Stories/Reels).
 - **Tone & Persona Modulation**: Switch between Thought Leadership, Conversational, Promotional, Storytelling, and Urgent tones.
 

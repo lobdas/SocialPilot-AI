@@ -11,7 +11,6 @@ export const PLATFORM_FLAGS: Record<PlatformType, string> = {
   INSTAGRAM: "FEATURE_INSTAGRAM",
   LINKEDIN: "FEATURE_LINKEDIN",
   X: "FEATURE_X",
-  WHATSAPP: "FEATURE_WHATSAPP",
   THREADS: "FEATURE_THREADS",
   PINTEREST: "FEATURE_PINTEREST",
   YOUTUBE: "FEATURE_YOUTUBE",
@@ -24,7 +23,6 @@ export const DEFAULT_PLATFORM_STATUS: Record<PlatformType, boolean> = {
   INSTAGRAM: true,   // Production Ready Tier 1
   LINKEDIN: true,    // Production Ready Tier 1
   X: false,          // Staged / Modular
-  WHATSAPP: false,   // Staged (Dedicated Messaging)
   THREADS: false,    // Staged
   PINTEREST: false,  // Staged
   YOUTUBE: false,    // Staged
@@ -59,7 +57,6 @@ export class FeatureFlagService {
       INSTAGRAM: { enabled: true, tier: 1, statusText: "Production Ready" },
       LINKEDIN: { enabled: true, tier: 1, statusText: "Production Ready" },
       X: { enabled: false, tier: 2, statusText: "Staged (Feature Flagged)" },
-      WHATSAPP: { enabled: false, tier: 2, statusText: "Staged (Requires Cloud API Setup)" },
       THREADS: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },
       PINTEREST: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },
       YOUTUBE: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },

@@ -27,15 +27,58 @@ export default function UnifiedSocialInboxPage() {
   const [replyText, setReplyText] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+
+  const fbAccount = data.socialAccounts.find((a) => a.platform === "FACEBOOK");
 
   const activeConversation =
     data.conversations.find((c) => c.id === selectedConvId) || data.conversations[0];
 
   const showToast = (msg: string) => {
     setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 3500);
   };
+
+  // Sync live comments from Facebook Graph API
+  const handleSyncFacebookComments = async (silent = false) => {
+    if (!fbAccount) {
+      if (!silent) showToast("Please connect Facebook in Social Accounts first.");
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const url = `/api/inbox/sync?token=${encodeURIComponent(
+        fbAccount.accessToken || ""
+      )}&accountId=${encodeURIComponent(fbAccount.platformAccountId || "")}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.success && json.conversations) {
+        if (json.conversations.length > 0) {
+          store.mergeConversations(json.conversations);
+          if (!selectedConvId || selectedConvId === "conv-1") {
+            setSelectedConvId(json.conversations[0].id);
+          }
+          showToast(`🎉 Synced ${json.count} live Facebook comment(s)!`);
+        } else if (!silent) {
+          showToast("Checked Facebook: No new comments found on recent posts.");
+        }
+      } else if (!silent && json.error) {
+        showToast(json.error);
+      }
+    } catch {
+      if (!silent) showToast("Failed to sync Facebook comments.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Auto-sync on page load if Facebook is connected
+  useEffect(() => {
+    if (fbAccount?.accessToken) {
+      handleSyncFacebookComments(true);
+    }
+  }, [fbAccount?.accessToken]);
 
   const handleFetchAISuggestions = async () => {
     if (!activeConversation) return;
@@ -51,12 +94,37 @@ export default function UnifiedSocialInboxPage() {
     }
   };
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!replyText.trim() || !activeConversation) return;
-    store.addInboxMessage(activeConversation.id, replyText, "AGENT");
+    const sentText = replyText;
+    store.addInboxMessage(activeConversation.id, sentText, "AGENT");
     setReplyText("");
     setAiSuggestions([]);
-    showToast("💬 Reply sent successfully via simulated channel API!");
+
+    // If this is a real Facebook comment, post reply directly to Facebook Graph API
+    if (activeConversation.id.startsWith("fb_")) {
+      try {
+        const res = await fetch("/api/inbox/reply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            commentId: activeConversation.id,
+            message: sentText,
+            token: fbAccount?.accessToken,
+          }),
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast("💬 Live reply published to Facebook comment!");
+        } else {
+          showToast(`Facebook Reply Notice: ${json.error || "Could not publish to Facebook"}`);
+        }
+      } catch {
+        showToast("Error sending reply to Facebook Graph API.");
+      }
+    } else {
+      showToast("💬 Reply sent successfully!");
+    }
   };
 
   const filteredConversations = data.conversations.filter((c) => {
@@ -88,15 +156,27 @@ export default function UnifiedSocialInboxPage() {
           </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center bg-[#121A2B] rounded-lg p-0.5 border border-[rgba(255,255,255,0.08)]">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Sync Facebook Comments button */}
           <button
-            onClick={() => setFilter("ALL")}
-            className={cn(
-              "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-              filter === "ALL" ? "bg-[#182238] text-white" : "text-slate-400 hover:text-white"
-            )}
+            onClick={() => handleSyncFacebookComments(false)}
+            disabled={isSyncing}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#182238] border border-[#D4FF32]/40 text-[#D4FF32] text-xs font-semibold hover:bg-[#D4FF32] hover:text-[#0B1020] transition-all cursor-pointer shadow-[0_0_12px_rgba(212,255,50,0.15)] disabled:opacity-50"
+            title="Fetch real comments from your connected Facebook Page"
           >
+            <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin")} />
+            <span>{isSyncing ? "Syncing..." : "Sync Facebook Comments"}</span>
+          </button>
+
+          {/* Filter Pills */}
+          <div className="flex items-center bg-[#121A2B] rounded-lg p-0.5 border border-[rgba(255,255,255,0.08)]">
+            <button
+              onClick={() => setFilter("ALL")}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                filter === "ALL" ? "bg-[#182238] text-white" : "text-slate-400 hover:text-white"
+              )}
+            >
             All Threads ({data.conversations.length})
           </button>
           <button
@@ -117,6 +197,7 @@ export default function UnifiedSocialInboxPage() {
           >
             ⭐ Hot Leads
           </button>
+          </div>
         </div>
       </div>
 
@@ -159,7 +240,7 @@ export default function UnifiedSocialInboxPage() {
                       <span className="text-xs font-bold text-white truncate">
                         {conv.customerName}
                       </span>
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-[10px] text-slate-500" suppressHydrationWarning>
                         {formatDate(conv.lastActivityAt, "time")}
                       </span>
                     </div>
@@ -228,7 +309,7 @@ export default function UnifiedSocialInboxPage() {
                       key={msg.id}
                       className={cn("flex flex-col", isAgent ? "items-end" : "items-start")}
                     >
-                      <span className="text-[10px] text-slate-500 mb-1 px-1">
+                      <span className="text-[10px] text-slate-500 mb-1 px-1" suppressHydrationWarning>
                         {msg.senderName} • {formatDate(msg.sentAt, "time")}
                       </span>
                       <div

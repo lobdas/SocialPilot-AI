@@ -4,6 +4,7 @@ import {
   Campaign,
   ContentItem,
   InboxConversation,
+  PlatformType,
   SocialAccount,
   Workspace,
 } from "./types";
@@ -68,7 +69,7 @@ const INITIAL_DATA: DemoStoreData = {
       prohibitedClaims: "Never guarantee exact ROI percentages, never claim 100% automated virality without human review",
       approvedExamples: "Stop wasting 15+ hours weekly reformatting captions. Scale your native reach with SocialPilot AI.",
       faqs: [
-        { question: "What platforms do you support?", answer: "We support Meta (Facebook & Instagram), LinkedIn, X, Threads, WhatsApp, Pinterest, YouTube, and TikTok." },
+        { question: "What platforms do you support?", answer: "We support Meta (Facebook & Instagram), LinkedIn, X, Threads, Pinterest, YouTube, and TikTok." },
         { question: "Does this include AI image generation?", answer: "Yes, built-in multi-aspect ratio generation and prompt engineering are included." }
       ]
     },
@@ -89,170 +90,7 @@ const INITIAL_DATA: DemoStoreData = {
     },
   ],
   activeBrandId: "brand-1",
-  socialAccounts: [
-    {
-      id: "acc-1",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "LINKEDIN",
-      platformAccountId: "li_org_98412",
-      accountName: "Apex Growth Agency",
-      handle: "apex-growth",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "ORGANIZATION",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: true,
-        canReplyToComments: true,
-        canReadMessages: false,
-        canSendMessages: false,
-        canReadAnalytics: true,
-        maxCharacterLimit: 3000,
-        supportsHashtags: true,
-        supportsCarousel: true,
-      },
-    },
-    {
-      id: "acc-2",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "X",
-      platformAccountId: "x_usr_44921",
-      accountName: "SocialPilot AI",
-      handle: "@socialpilot_ai",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "USER",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: true,
-        canReplyToComments: true,
-        canReadMessages: true,
-        canSendMessages: true,
-        canReadAnalytics: true,
-        maxCharacterLimit: 280,
-        supportsHashtags: true,
-        supportsCarousel: false,
-      },
-    },
-    {
-      id: "acc-3",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "INSTAGRAM",
-      platformAccountId: "ig_biz_88310",
-      accountName: "socialpilot.ai",
-      handle: "@socialpilot.ai",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "BUSINESS",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: true,
-        canReplyToComments: true,
-        canReadMessages: true,
-        canSendMessages: true,
-        canReadAnalytics: true,
-        maxCharacterLimit: 2200,
-        supportsHashtags: true,
-        supportsCarousel: true,
-      },
-    },
-    {
-      id: "acc-4",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "FACEBOOK",
-      platformAccountId: "fb_pg_77123",
-      accountName: "SocialPilot Technologies",
-      handle: "socialpilot.tech",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "PAGE",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: true,
-        canReplyToComments: true,
-        canReadMessages: true,
-        canSendMessages: true,
-        canReadAnalytics: true,
-        maxCharacterLimit: 63206,
-        supportsHashtags: true,
-        supportsCarousel: true,
-      },
-    },
-    {
-      id: "acc-5",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "WHATSAPP",
-      platformAccountId: "wa_biz_33109",
-      accountName: "SocialPilot Concierge",
-      handle: "+1 (800) 555-FLOW",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "BUSINESS",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: false,
-        canReplyToComments: false,
-        canReadMessages: true,
-        canSendMessages: true,
-        canReadAnalytics: false,
-        maxCharacterLimit: 4096,
-        supportsHashtags: false,
-        supportsCarousel: false,
-      },
-    },
-    {
-      id: "acc-6",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      platform: "THREADS",
-      platformAccountId: "th_usr_55102",
-      accountName: "socialpilot",
-      handle: "@socialpilot",
-      avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-      accountType: "USER",
-      status: "ACTIVE",
-      lastSyncAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-      isDemoAccount: true,
-      capabilities: {
-        canPublishText: true,
-        canPublishImage: true,
-        canPublishVideo: true,
-        canReadComments: true,
-        canReplyToComments: true,
-        canReadMessages: false,
-        canSendMessages: false,
-        canReadAnalytics: true,
-        maxCharacterLimit: 500,
-        supportsHashtags: true,
-        supportsCarousel: true,
-      },
-    },
-  ],
+  socialAccounts: [],
   posts: [
     {
       id: "post-1",
@@ -538,13 +376,22 @@ class DemoStore {
     if (typeof window !== "undefined" && !this.isLoadedFromStorage) {
       this.isLoadedFromStorage = true;
       try {
-        const saved = localStorage.getItem("socialpilot_demo_store_v1");
+        // Clean up legacy stores
+        localStorage.removeItem("socialpilot_demo_store_v1");
+        localStorage.removeItem("socialpilot_demo_store_v2");
+        localStorage.removeItem("socialpilot_demo_store_v3");
+
+        const saved = localStorage.getItem("socialpilot_demo_store_v4");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.brands) && Array.isArray(parsed.posts)) {
             this.data = parsed;
             this.notify();
+            return;
           }
+        } else {
+          // Initialize fresh v4 store
+          this.persist();
         }
       } catch (e) {
         console.error("Failed to parse saved demo store", e);
@@ -554,7 +401,18 @@ class DemoStore {
 
   private persist() {
     if (typeof window !== "undefined") {
-      localStorage.setItem("socialpilot_demo_store_v1", JSON.stringify(this.data));
+      try {
+        // Strip massive base64 image strings from localStorage to prevent QuotaExceededError (5MB browser limit)
+        const serialized = JSON.stringify(this.data, (key, value) => {
+          if (typeof value === "string" && value.startsWith("data:image/") && value.length > 10000) {
+            return value.slice(0, 100) + "...[IMAGE_ATTACHED]";
+          }
+          return value;
+        });
+        localStorage.setItem("socialpilot_demo_store_v4", serialized);
+      } catch (e) {
+        console.warn("Storage quota exceeded; retained cleanly in active memory:", e);
+      }
     }
     this.notify();
   }
@@ -673,6 +531,11 @@ class DemoStore {
     this.persist();
   }
 
+  addMediaAsset(asset: DemoStoreData["mediaAssets"][0]) {
+    this.data.mediaAssets = [asset, ...this.data.mediaAssets];
+    this.persist();
+  }
+
   addInboxMessage(conversationId: string, content: string, senderType: "AGENT" | "CUSTOMER" = "AGENT") {
     this.data.conversations = this.data.conversations.map((conv) => {
       if (conv.id === conversationId) {
@@ -696,6 +559,17 @@ class DemoStore {
     this.persist();
   }
 
+  mergeConversations(newConvs: InboxConversation[]) {
+    const existingIds = new Set(this.data.conversations.map((c) => c.id));
+    const toAdd = newConvs.filter((c) => !existingIds.has(c.id));
+    const updated = this.data.conversations.map((c) => {
+      const incoming = newConvs.find((n) => n.id === c.id);
+      return incoming ? incoming : c;
+    });
+    this.data.conversations = [...toAdd, ...updated];
+    this.persist();
+  }
+
   toggleAccountStatus(accountId: string) {
     this.data.socialAccounts = this.data.socialAccounts.map((acc) => {
       if (acc.id === accountId) {
@@ -704,6 +578,88 @@ class DemoStore {
       }
       return acc;
     });
+    this.persist();
+  }
+
+  updateSocialAccount(accountId: string, updates: Partial<SocialAccount>) {
+    this.data.socialAccounts = this.data.socialAccounts.map((acc) => {
+      if (acc.id === accountId) {
+        return { ...acc, ...updates, lastSyncAt: new Date().toISOString() };
+      }
+      return acc;
+    });
+    this.persist();
+  }
+
+  connectAccount(
+    platform: PlatformType,
+    accountName?: string,
+    handle?: string,
+    avatarUrl?: string,
+    accessToken?: string,
+    platformAccountId?: string
+  ) {
+    const existing = this.data.socialAccounts.find((a) => a.platform === platform);
+    if (existing) {
+      this.data.socialAccounts = this.data.socialAccounts.map((a) =>
+        a.platform === platform
+          ? {
+              ...a,
+              accountName: accountName || a.accountName,
+              handle: handle || a.handle,
+              avatarUrl: avatarUrl || a.avatarUrl,
+              accessToken: accessToken || a.accessToken,
+              platformAccountId: platformAccountId || a.platformAccountId,
+              status: "ACTIVE",
+              lastSyncAt: new Date().toISOString(),
+            }
+          : a
+      );
+    } else {
+      const newAcc: SocialAccount = {
+        id: `acc-${Date.now()}`,
+        workspaceId: this.data.activeWorkspaceId,
+        brandId: this.data.activeBrandId,
+        platform,
+        platformAccountId: platformAccountId || `${platform.toLowerCase()}_${Date.now()}`,
+        accountName: accountName || `${platform} Verified Account`,
+        handle: handle || `@${platform.toLowerCase()}_account`,
+        avatarUrl:
+          avatarUrl ||
+          "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
+        accountType: "PAGE",
+        status: "ACTIVE",
+        lastSyncAt: new Date().toISOString(),
+        isDemoAccount: false,
+        accessToken,
+        capabilities: {
+          canPublishText: true,
+          canPublishImage: true,
+          canPublishVideo: true,
+          canReadComments: true,
+          canReplyToComments: true,
+          canReadMessages: true,
+          canSendMessages: true,
+          canReadAnalytics: true,
+          maxCharacterLimit: 3000,
+          supportsHashtags: true,
+          supportsCarousel: true,
+        },
+      };
+      this.data.socialAccounts.push(newAcc);
+    }
+    this.persist();
+  }
+
+  updateAccountToken(accountId: string, accessToken: string) {
+    this.data.socialAccounts = this.data.socialAccounts.map((a) =>
+      a.id === accountId ? { ...a, accessToken } : a
+    );
+    this.persist();
+  }
+
+  disconnectAccount(accountId: string) {
+    this.data.socialAccounts = this.data.socialAccounts.filter((a) => a.id !== accountId);
     this.persist();
   }
 

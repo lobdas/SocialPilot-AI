@@ -54,7 +54,7 @@ const TIERS = [
       "Custom tokenized client approval portals",
       "Dedicated multi-workspace switcher",
       "100 GB media storage",
-      "WhatsApp Cloud API integration",
+      "Priority 24/7 API publishing queues",
     ],
     isCurrent: true,
     badge: "CURRENT ACTIVE PLAN",

@@ -5,7 +5,6 @@ export type PlatformType =
   | "INSTAGRAM"
   | "LINKEDIN"
   | "X"
-  | "WHATSAPP"
   | "THREADS"
   | "PINTEREST"
   | "YOUTUBE"
@@ -62,6 +61,7 @@ export interface SocialAccount {
   lastSyncAt: string;
   isDemoAccount: boolean;
   capabilities: PlatformCapabilities;
+  accessToken?: string;
 }
 
 export interface Brand {

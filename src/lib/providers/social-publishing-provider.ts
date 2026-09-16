@@ -36,6 +36,8 @@ export interface OAuthTokenResult {
   scopes: string[];
   platformAccountId: string;
   accountName: string;
+  handle?: string;
+  avatarUrl?: string;
 }
 
 export interface ISocialPublishingProvider {

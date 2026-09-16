@@ -52,7 +52,7 @@ const PLANS = [
       "1,000 AI image renders / mo",
       "Unlimited Brand Brain workspaces",
       "Custom branded client approval portals",
-      "WhatsApp Business Cloud API integration",
+      "Priority 24/7 API publishing queues",
       "Unlimited team seats & role permissions",
       "100 GB media asset storage",
     ],
@@ -68,7 +68,7 @@ const FAQS = [
   },
   {
     q: "What platforms can I actually publish to?",
-    a: "Tier 1 live integrations are fully supported for Meta (Facebook Pages & Instagram Business) and LinkedIn. Other networks such as X, Threads, and WhatsApp Cloud API are staged behind feature flags and available in simulated mode.",
+    a: "Tier 1 live integrations are fully supported for Meta (Facebook Pages & Instagram Business) and LinkedIn. Other networks such as X, Threads, and Pinterest are staged behind feature flags and available in simulated mode.",
   },
   {
     q: "How do passwordless client approvals work?",

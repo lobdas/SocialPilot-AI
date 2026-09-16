@@ -57,15 +57,6 @@ const INTEGRATIONS: IntegrationItem[] = [
     protocol: "X API v2 (OAuth 2.0 User Context)",
   },
   {
-    id: "whatsapp",
-    name: "WhatsApp Business Cloud API",
-    category: "IN_DEVELOPMENT",
-    desc: "Decoupled conversational messaging engine for approved template broadcasts, 2-way customer concierge, and inbound webhooks.",
-    color: "#25D366",
-    capabilities: ["Template Broadcasts", "2-Way Inbound Chats", "Media Messages", "Automated AI Replies"],
-    protocol: "Meta WhatsApp Cloud API (Graph API)",
-  },
-  {
     id: "threads",
     name: "Threads by Meta",
     category: "IN_DEVELOPMENT",

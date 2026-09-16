@@ -23,7 +23,7 @@ import { cn, formatDate } from "@/lib/utils";
 type CalendarViewMode = "month" | "week" | "list";
 
 export default function ContentCalendarPage() {
-  const { data } = useDemoStore();
+  const { data, mounted } = useDemoStore();
   const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [selectedPlatform, setSelectedPlatform] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
@@ -139,7 +139,8 @@ export default function ContentCalendarPage() {
             <option value="X">X (Twitter)</option>
             <option value="INSTAGRAM">Instagram</option>
             <option value="FACEBOOK">Facebook</option>
-            <option value="WHATSAPP">WhatsApp</option>
+            <option value="THREADS">Threads</option>
+            <option value="PINTEREST">Pinterest</option>
           </select>
 
           {/* Status Filter */}
@@ -303,9 +304,13 @@ export default function ContentCalendarPage() {
               </div>
 
               <div className="flex items-center gap-3 sm:text-right">
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[11px] text-slate-400" suppressHydrationWarning>
                   <div className="font-medium text-slate-200">
-                    {post.scheduledAt ? formatDate(post.scheduledAt) : formatDate(post.createdAt)}
+                    {mounted
+                      ? post.scheduledAt
+                        ? formatDate(post.scheduledAt)
+                        : formatDate(post.createdAt)
+                      : "Recently"}
                   </div>
                   <span className="text-[10px] text-slate-500">UTC-04 (EDT)</span>
                 </div>

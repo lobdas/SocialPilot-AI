@@ -49,14 +49,14 @@ export class MetaPublishingProvider implements ISocialPublishingProvider {
 
   getAuthorizationUrl(params: { state: string; redirectUri: string; scopes?: string[] }): string {
     const appId = process.env.META_APP_ID || "MOCK_META_APP_ID";
-    const defaultScopes = [
-      "pages_show_list",
-      "pages_read_engagement",
-      "pages_manage_posts",
-      "instagram_basic",
-      "instagram_content_publish",
-      "business_management",
-    ];
+    const fbScopes = process.env.META_FACEBOOK_SCOPES
+      ? process.env.META_FACEBOOK_SCOPES.split(",").map((s) => s.trim())
+      : ["public_profile", "pages_show_list"];
+    const igScopes = process.env.META_INSTAGRAM_SCOPES
+      ? process.env.META_INSTAGRAM_SCOPES.split(",").map((s) => s.trim())
+      : ["public_profile", "instagram_basic"];
+
+    const defaultScopes = this.platform === "FACEBOOK" ? fbScopes : igScopes;
     const scopes = params.scopes || defaultScopes;
 
     return `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(
@@ -91,11 +91,59 @@ export class MetaPublishingProvider implements ISocialPublishingProvider {
       throw new Error(`Meta OAuth Exchange Failed: ${data.error?.message || "Unknown error"}`);
     }
 
+    let realAccountName = "Facebook Page";
+    let realHandle = "@facebook_page";
+    let realAvatarUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80";
+    let finalAccessToken = data.access_token;
+    let finalAccountId = data.user_id || "meta_user";
+
+    try {
+      // 1. Fetch user's managed Facebook Pages
+      const accountsRes = await fetch(
+        `https://graph.facebook.com/v20.0/me/accounts?access_token=${data.access_token}&fields=id,name,category,access_token,picture{url}`
+      );
+      if (accountsRes.ok) {
+        const accountsData = await accountsRes.json();
+        if (accountsData.data && accountsData.data.length > 0) {
+          const page = accountsData.data[0];
+          realAccountName = page.name;
+          realHandle = `@${page.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`;
+          finalAccountId = page.id;
+          if (page.access_token) {
+            finalAccessToken = page.access_token;
+          }
+          if (page.picture?.data?.url) {
+            realAvatarUrl = page.picture.data.url;
+          }
+        } else {
+          // 2. Fallback to Facebook user profile name
+          const meRes = await fetch(
+            `https://graph.facebook.com/v20.0/me?access_token=${data.access_token}&fields=id,name,picture{url}`
+          );
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            if (meData.name) {
+              realAccountName = meData.name;
+              realHandle = `@${meData.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`;
+              finalAccountId = meData.id;
+              if (meData.picture?.data?.url) {
+                realAvatarUrl = meData.picture.data.url;
+              }
+            }
+          }
+        }
+      }
+    } catch (fetchErr) {
+      console.warn("Failed to fetch detailed page profile from Graph API:", fetchErr);
+    }
+
     return {
-      accessToken: data.access_token,
-      scopes: ["pages_manage_posts", "instagram_content_publish"],
-      platformAccountId: data.user_id || "meta_user",
-      accountName: "Meta Verified Account",
+      accessToken: finalAccessToken,
+      scopes: ["pages_show_list"],
+      platformAccountId: finalAccountId,
+      accountName: realAccountName,
+      handle: realHandle,
+      avatarUrl: realAvatarUrl,
       expiresInSeconds: data.expires_in,
     };
   }

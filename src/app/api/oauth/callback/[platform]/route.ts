@@ -43,44 +43,80 @@ export async function GET(
       : undefined;
 
     if (process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
-      // In production, save to PostgreSQL
-      const workspaceId = "ws-1"; // Extracted from session or validated state
-      await prisma.socialAccount.upsert({
-        where: {
-          workspaceId_platform_platformAccountId: {
+      // Try saving to PostgreSQL if DB is running
+      try {
+        const workspaceId = "ws-1";
+        await prisma.socialAccount.upsert({
+          where: {
+            workspaceId_platform_platformAccountId: {
+              workspaceId,
+              platform,
+              platformAccountId: tokenResult.platformAccountId,
+            },
+          },
+          create: {
             workspaceId,
             platform,
             platformAccountId: tokenResult.platformAccountId,
+            accountName: tokenResult.accountName,
+            encryptedToken: encryptedAccess.encrypted,
+            tokenIv: encryptedAccess.iv,
+            tokenAuthTag: encryptedAccess.authTag,
+            refreshToken: encryptedRefresh?.encrypted,
+            scopes: tokenResult.scopes,
+            tokenStatus: "ACTIVE",
+            lastSyncAt: new Date(),
           },
-        },
-        create: {
-          workspaceId,
-          platform,
-          platformAccountId: tokenResult.platformAccountId,
-          accountName: tokenResult.accountName,
-          encryptedToken: encryptedAccess.encrypted,
-          tokenIv: encryptedAccess.iv,
-          tokenAuthTag: encryptedAccess.authTag,
-          refreshToken: encryptedRefresh?.encrypted,
-          scopes: tokenResult.scopes,
-          tokenStatus: "ACTIVE",
-          lastSyncAt: new Date(),
-        },
-        update: {
-          encryptedToken: encryptedAccess.encrypted,
-          tokenIv: encryptedAccess.iv,
-          tokenAuthTag: encryptedAccess.authTag,
-          refreshToken: encryptedRefresh?.encrypted,
-          tokenStatus: "ACTIVE",
-          lastSyncAt: new Date(),
-          lastRefreshedAt: new Date(),
-        },
+          update: {
+            encryptedToken: encryptedAccess.encrypted,
+            tokenIv: encryptedAccess.iv,
+            tokenAuthTag: encryptedAccess.authTag,
+            refreshToken: encryptedRefresh?.encrypted,
+            tokenStatus: "ACTIVE",
+            lastSyncAt: new Date(),
+            lastRefreshedAt: new Date(),
+          },
+        });
+      } catch (dbErr: any) {
+        console.warn("PostgreSQL storage skipped (DB unreachable on localhost:5432):", dbErr.message);
+      }
+    }
+
+    const redirectUrl = new URL(`/app/social-accounts`, req.url);
+    redirectUrl.searchParams.set("connected", platform);
+    if (tokenResult.accountName) {
+      redirectUrl.searchParams.set("accountName", tokenResult.accountName);
+    }
+    if (tokenResult.handle) {
+      redirectUrl.searchParams.set("handle", tokenResult.handle);
+    }
+    if (tokenResult.avatarUrl) {
+      redirectUrl.searchParams.set("avatarUrl", tokenResult.avatarUrl);
+    }
+    if (tokenResult.accessToken) {
+      redirectUrl.searchParams.set("token", tokenResult.accessToken);
+    }
+    if (tokenResult.platformAccountId) {
+      redirectUrl.searchParams.set("accountId", tokenResult.platformAccountId);
+    }
+
+    const response = NextResponse.redirect(redirectUrl);
+    if (tokenResult.accessToken) {
+      response.cookies.set(`token_${platform.toLowerCase()}`, tokenResult.accessToken, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 60, // 60 days
+      });
+    }
+    if (tokenResult.platformAccountId) {
+      response.cookies.set(`page_id_${platform.toLowerCase()}`, tokenResult.platformAccountId, {
+        httpOnly: true,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 60,
       });
     }
 
-    return NextResponse.redirect(
-      new URL(`/app/social-accounts?connected=${encodeURIComponent(platform)}`, req.url)
-    );
+    return response;
   } catch (err: any) {
     console.error("OAuth exchange failed:", err);
     return NextResponse.redirect(

@@ -21,7 +21,7 @@ import { useDemoStore } from "@/lib/use-demo-store";
 import { formatDate, formatNumber } from "@/lib/utils";
 
 export default function DashboardOverview() {
-  const { data, activeBrand } = useDemoStore();
+  const { data, activeBrand, mounted } = useDemoStore();
 
   const scheduledPosts = data.posts.filter((p) => p.status === "SCHEDULED");
   const publishedPosts = data.posts.filter((p) => p.status === "PUBLISHED");
@@ -185,8 +185,14 @@ export default function DashboardOverview() {
                     </div>
                   </div>
 
-                  <div className="text-right sm:flex-shrink-0 text-[11px] text-slate-400">
-                    <div>{post.scheduledAt ? formatDate(post.scheduledAt) : formatDate(post.createdAt)}</div>
+                  <div className="text-right sm:flex-shrink-0 text-[11px] text-slate-400" suppressHydrationWarning>
+                    <div>
+                      {mounted
+                        ? post.scheduledAt
+                          ? formatDate(post.scheduledAt)
+                          : formatDate(post.createdAt)
+                        : "Recently"}
+                    </div>
                     <Link
                       href="/app/content-studio"
                       className="text-slate-300 hover:text-white hover:underline mt-1 inline-block"

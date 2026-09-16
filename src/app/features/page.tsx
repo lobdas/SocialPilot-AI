@@ -24,9 +24,9 @@ export default function FeaturesPage() {
       id: "content-studio",
       title: "AI Content Studio",
       icon: Sparkles,
-      tagline: "One brief. Seven native platform adaptations.",
+      tagline: "One brief. Native cross-network adaptations.",
       description:
-        "Generic cross-posting kills algorithm reach. SocialPilot adapts your single concept into native LinkedIn narratives with line spacing, punchy X hooks under 280 characters, Instagram carousel openers, Facebook community updates, and WhatsApp broadcasts.",
+        "Generic cross-posting kills algorithm reach. SocialPilot adapts your single concept into native LinkedIn narratives with line spacing, punchy X hooks under 280 characters, Instagram carousel openers, Facebook community updates, Threads, and Pinterest pins.",
       features: [
         "Channel-specific character enforcement",
         "Hashtag cluster generation & relevance scoring",

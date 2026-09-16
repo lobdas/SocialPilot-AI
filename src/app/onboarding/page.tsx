@@ -28,8 +28,8 @@ const PLATFORMS_TO_CONNECT: { id: PlatformType; name: string }[] = [
   { id: "X", name: "X (Twitter)" },
   { id: "INSTAGRAM", name: "Instagram" },
   { id: "FACEBOOK", name: "Facebook" },
-  { id: "WHATSAPP", name: "WhatsApp Business" },
   { id: "THREADS", name: "Threads" },
+  { id: "PINTEREST", name: "Pinterest" },
 ];
 
 export default function OnboardingWizardPage() {
