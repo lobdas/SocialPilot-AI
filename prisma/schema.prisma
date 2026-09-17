@@ -29,6 +29,7 @@ enum PlatformType {
   PINTEREST
   YOUTUBE
   TIKTOK
+  GOOGLE_BUSINESS
 }
 
 enum ContentStatus {

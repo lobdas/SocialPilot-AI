@@ -114,6 +114,19 @@ export class MockSocialProvider implements ISocialProvider {
         supportsHashtags: true,
         supportsCarousel: false,
       },
+      GOOGLE_BUSINESS: {
+        canPublishText: true,
+        canPublishImage: true,
+        canPublishVideo: false,
+        canReadComments: true,
+        canReplyToComments: true,
+        canReadMessages: false,
+        canSendMessages: false,
+        canReadAnalytics: true,
+        maxCharacterLimit: 1500,
+        supportsHashtags: false,
+        supportsCarousel: false,
+      },
     };
 
     return caps[this.platform];

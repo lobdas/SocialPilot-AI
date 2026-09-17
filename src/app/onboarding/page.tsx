@@ -28,6 +28,7 @@ const PLATFORMS_TO_CONNECT: { id: PlatformType; name: string }[] = [
   { id: "X", name: "X (Twitter)" },
   { id: "INSTAGRAM", name: "Instagram" },
   { id: "FACEBOOK", name: "Facebook" },
+  { id: "GOOGLE_BUSINESS", name: "Google Business (GMB)" },
   { id: "THREADS", name: "Threads" },
   { id: "PINTEREST", name: "Pinterest" },
 ];

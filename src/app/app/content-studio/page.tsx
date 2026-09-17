@@ -21,6 +21,9 @@ import {
   Upload,
   ImagePlus,
   Bot,
+  Store,
+  Star,
+  MapPin,
 } from "lucide-react";
 import { demoStore } from "@/lib/demo-store";
 import { useDemoStore } from "@/lib/use-demo-store";
@@ -34,6 +37,7 @@ const PLATFORMS: { id: PlatformType; name: string; color: string; limit: number 
   { id: "X", name: "X (Twitter)", color: "#FFFFFF", limit: 280 },
   { id: "INSTAGRAM", name: "Instagram", color: "#E4405F", limit: 2200 },
   { id: "FACEBOOK", name: "Facebook", color: "#1877F2", limit: 63206 },
+  { id: "GOOGLE_BUSINESS", name: "Google Business (GMB)", color: "#4285F4", limit: 1500 },
   { id: "THREADS", name: "Threads", color: "#FFFFFF", limit: 500 },
   { id: "PINTEREST", name: "Pinterest", color: "#BD081C", limit: 500 },
 ];
@@ -77,6 +81,7 @@ export default function ContentStudioPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [notification, setNotification] = useState<{ type: "success" | "error" | "info"; msg: string } | null>(null);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
 
   // Selected media for post (Empty by default, direct upload only)
   const [selectedMedia, setSelectedMedia] = useState<string>("");
@@ -139,6 +144,14 @@ export default function ContentStudioPage() {
       ctaText: "Visit Site",
       ctaUrl: "https://socialpilot.ai",
       characterCount: 220,
+    },
+    GOOGLE_BUSINESS: {
+      platform: "GOOGLE_BUSINESS",
+      caption: `📢 Exciting Update for our Local Community!\n\nAre you looking to streamline your social media workflow and scale your brand presence effortlessly? Visit us or explore our solutions online to see how modern teams are saving 20+ hours every month.\n\n👉 Connect with our team today for a tailored walkthrough!`,
+      hashtags: [],
+      ctaText: "Learn More",
+      ctaUrl: "https://socialpilot.ai",
+      characterCount: 320,
     },
   } as any);
 
@@ -322,7 +335,7 @@ export default function ContentStudioPage() {
         });
 
         if (res.live) {
-          showToast(`🎉 লাইভ পোস্ট আপনার Facebook Page-এ সফলভাবে পাবলিশ হয়েছে! (ID: ${res.postId})`, "success");
+          showToast(`🎉 লাইভ পোস্ট আপনার ${activeTab} অ্যাকাউন্টে সফলভাবে পাবলিশ হয়েছে! (ID: ${res.postId})`, "success");
         } else {
           showToast(`🚀 Published successfully to your SocialPilot Dashboard!`, "success");
         }
@@ -402,6 +415,32 @@ export default function ContentStudioPage() {
             <Sparkles className="w-4 h-4 text-sky-400 flex-shrink-0" />
           )}
           <span>{notification.msg}</span>
+        </div>
+      )}
+
+      {selectedMedia && isImagePreviewOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-[#020817]/80 backdrop-blur-sm p-4"
+          onClick={() => setIsImagePreviewOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[#121A2B] p-3 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsImagePreviewOpen(false)}
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#0B1020] text-slate-200 border border-[rgba(255,255,255,0.12)] hover:text-white cursor-pointer"
+              aria-label="Close image preview"
+            >
+              ✕
+            </button>
+            <img
+              src={selectedMedia}
+              alt="Selected media preview"
+              className="max-h-[80vh] w-full rounded-xl object-contain bg-[#0B1020]"
+            />
+          </div>
         </div>
       )}
 
@@ -729,6 +768,64 @@ export default function ContentStudioPage() {
               </div>
             )}
 
+            {/* Google Business Profile Action Button (CTA) */}
+            {activeTab === "GOOGLE_BUSINESS" && (
+              <div className="p-3 rounded-lg bg-[#0B1020] border border-[#4285F4]/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-white flex items-center gap-1.5 text-[#4285F4]">
+                    <Store className="w-3.5 h-3.5" />
+                    <span>Google Business Call-to-Action (CTA)</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400">Maps & Search</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Button Action</label>
+                    <select
+                      value={currentVariant.ctaText || "Learn More"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setVariants((prev) => ({
+                          ...prev,
+                          [activeTab]: {
+                            ...prev[activeTab],
+                            ctaText: val,
+                          },
+                        }));
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded bg-[#182238] border border-[rgba(255,255,255,0.08)] text-xs text-white focus:outline-none focus:border-[#4285F4]"
+                    >
+                      <option value="Learn More">Learn More</option>
+                      <option value="Call Now">Call Now</option>
+                      <option value="Book Online">Book Online</option>
+                      <option value="Order Online">Order Online</option>
+                      <option value="Sign Up">Sign Up</option>
+                      <option value="Get Offer">Get Offer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Action URL / Phone</label>
+                    <input
+                      type="text"
+                      value={currentVariant.ctaUrl || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setVariants((prev) => ({
+                          ...prev,
+                          [activeTab]: {
+                            ...prev[activeTab],
+                            ctaUrl: val,
+                          },
+                        }));
+                      }}
+                      placeholder="https://yourwebsite.com"
+                      className="w-full px-2.5 py-1.5 rounded bg-[#182238] border border-[rgba(255,255,255,0.08)] text-xs text-white focus:outline-none focus:border-[#4285F4]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Direct Image Upload Section (No Media Library) */}
             <div className="pt-3 border-t border-[rgba(255,255,255,0.06)] space-y-2">
               <div className="flex items-center justify-between">
@@ -799,11 +896,18 @@ export default function ContentStudioPage() {
                 /* Uploaded Image Card */
                 <div className="p-2.5 rounded-xl bg-[#0B1020] border border-[rgba(255,255,255,0.08)] flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src={selectedMedia}
-                      alt="Uploaded"
-                      className="w-12 h-12 rounded-lg object-cover border border-[#D4FF32]/50 flex-shrink-0"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsImagePreviewOpen(true)}
+                      className="cursor-pointer rounded-lg overflow-hidden border border-[#D4FF32]/50 flex-shrink-0"
+                      aria-label="Preview uploaded image"
+                    >
+                      <img
+                        src={selectedMedia}
+                        alt="Uploaded"
+                        className="w-12 h-12 object-cover"
+                      />
+                    </button>
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-white truncate">
                         {uploadedFileName || "Uploaded Image"}
@@ -888,39 +992,66 @@ export default function ContentStudioPage() {
             {/* Native Card Preview Container */}
             <div className="p-3.5 rounded-xl bg-[#0B1020] border border-[rgba(255,255,255,0.08)] space-y-3 text-left">
               {/* Profile Bar */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  {connectedChannel?.avatarUrl ? (
-                    <img
-                      src={connectedChannel.avatarUrl}
-                      alt=""
-                      className="w-9 h-9 rounded-full object-cover border border-[#D4FF32]/40 flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-[#182238] border border-[rgba(255,255,255,0.1)] flex items-center justify-center font-bold text-xs text-[#D4FF32] flex-shrink-0">
-                      {connectedChannel ? connectedChannel.accountName.slice(0, 2).toUpperCase() : "SP"}
+              {activeTab === "GOOGLE_BUSINESS" ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-[#4285F4] flex items-center justify-center font-bold text-sm text-white flex-shrink-0 shadow-md">
+                      G
                     </div>
-                  )}
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-white flex items-center gap-1">
-                      <span className="truncate max-w-[150px]">
-                        {connectedChannel ? connectedChannel.accountName : activeBrand.name}
-                      </span>
-                      {activeTab === "X" && (
-                        <span className="text-[10px] text-sky-400 font-bold">✓</span>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
-                      {connectedChannel
-                        ? connectedChannel.handle || `@${activeTab.toLowerCase()}_page`
-                        : activeTab === "LINKEDIN"
-                        ? "14,800 followers • 2h"
-                        : "@" + activeBrand.slug}
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span className="truncate max-w-[150px]">
+                          {connectedChannel ? connectedChannel.accountName : activeBrand.name}
+                        </span>
+                        <span className="text-[9px] bg-[#4285F4]/20 text-[#4285F4] px-1.5 py-0.2 rounded font-semibold border border-[#4285F4]/40 flex items-center gap-0.5">
+                          ✓ Verified
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-amber-400 flex items-center gap-1 mt-0.5">
+                        <span className="tracking-tighter">★★★★★</span>
+                        <span className="text-slate-400 font-sans font-medium">4.9 (148) • Google Maps</span>
+                      </div>
                     </div>
                   </div>
+                  <span className="text-[9px] text-[#4285F4] font-semibold flex-shrink-0 bg-[#4285F4]/10 border border-[#4285F4]/20 px-2 py-0.5 rounded-full">
+                    GMB Update
+                  </span>
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">{activeTab}</span>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {connectedChannel?.avatarUrl ? (
+                      <img
+                        src={connectedChannel.avatarUrl}
+                        alt=""
+                        className="w-9 h-9 rounded-full object-cover border border-[#D4FF32]/40 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-[#182238] border border-[rgba(255,255,255,0.1)] flex items-center justify-center font-bold text-xs text-[#D4FF32] flex-shrink-0">
+                        {connectedChannel ? connectedChannel.accountName.slice(0, 2).toUpperCase() : "SP"}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-white flex items-center gap-1">
+                        <span className="truncate max-w-[150px]">
+                          {connectedChannel ? connectedChannel.accountName : activeBrand.name}
+                        </span>
+                        {activeTab === "X" && (
+                          <span className="text-[10px] text-sky-400 font-bold">✓</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
+                        {connectedChannel
+                          ? connectedChannel.handle || `@${activeTab.toLowerCase()}_page`
+                          : activeTab === "LINKEDIN"
+                          ? "14,800 followers • 2h"
+                          : "@" + activeBrand.slug}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">{activeTab}</span>
+                </div>
+              )}
 
               {/* Caption Text with native line-breaks */}
               <div className="text-xs text-slate-200 whitespace-pre-line leading-relaxed max-h-60 overflow-y-auto pr-1">
@@ -937,20 +1068,51 @@ export default function ContentStudioPage() {
               {/* Media Preview Box */}
               {selectedMedia && (
                 <div className="rounded-lg overflow-hidden border border-[rgba(255,255,255,0.08)] bg-[#121A2B]">
-                  <img
-                    src={selectedMedia}
-                    alt="Post media preview"
-                    className="w-full h-44 object-cover"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsImagePreviewOpen(true)}
+                    className="block w-full cursor-pointer"
+                    aria-label="Preview post media"
+                  >
+                    <img
+                      src={selectedMedia}
+                      alt="Post media preview"
+                      className="w-full h-44 object-cover"
+                    />
+                  </button>
                 </div>
               )}
 
-              {/* Interactive Dummy Engagement Bar */}
-              <div className="pt-2 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between text-[11px] text-slate-500">
-                <span>👍 142 Likes</span>
-                <span>💬 28 Comments</span>
-                <span>🔁 12 Shares</span>
-              </div>
+              {/* Google Business Call to Action Button */}
+              {activeTab === "GOOGLE_BUSINESS" && (
+                <div className="pt-1">
+                  <a
+                    href={currentVariant.ctaUrl || "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 rounded-full bg-[#1A73E8] hover:bg-[#1557B0] text-white text-xs font-bold transition-all shadow-md text-center cursor-pointer uppercase tracking-wider"
+                  >
+                    <span>{currentVariant.ctaText || "Learn More"}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
+
+              {/* Interactive Engagement Bar */}
+              {activeTab === "GOOGLE_BUSINESS" ? (
+                <div className="pt-2 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1 text-slate-400">
+                    <MapPin className="w-3 h-3 text-[#4285F4]" /> Verified Google Business
+                  </span>
+                  <span className="text-[#4285F4] font-semibold text-[10px]">Search & Maps</span>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-[rgba(255,255,255,0.06)] flex items-center justify-between text-[11px] text-slate-500">
+                  <span>👍 142 Likes</span>
+                  <span>💬 28 Comments</span>
+                  <span>🔁 12 Shares</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -50,13 +50,13 @@ export async function GET(
           where: {
             workspaceId_platform_platformAccountId: {
               workspaceId,
-              platform,
+              platform: platform as any,
               platformAccountId: tokenResult.platformAccountId,
             },
           },
           create: {
             workspaceId,
-            platform,
+            platform: platform as any,
             platformAccountId: tokenResult.platformAccountId,
             accountName: tokenResult.accountName,
             encryptedToken: encryptedAccess.encrypted,

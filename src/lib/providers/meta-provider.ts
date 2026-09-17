@@ -51,10 +51,17 @@ export class MetaPublishingProvider implements ISocialPublishingProvider {
     const appId = process.env.META_APP_ID || "MOCK_META_APP_ID";
     const fbScopes = process.env.META_FACEBOOK_SCOPES
       ? process.env.META_FACEBOOK_SCOPES.split(",").map((s) => s.trim())
-      : ["public_profile", "pages_show_list"];
+      : ["public_profile", "pages_show_list", "pages_manage_posts"];
     const igScopes = process.env.META_INSTAGRAM_SCOPES
       ? process.env.META_INSTAGRAM_SCOPES.split(",").map((s) => s.trim())
-      : ["public_profile", "instagram_basic"];
+      : [
+          "public_profile",
+          "pages_show_list",
+          "pages_read_engagement",
+          "pages_manage_posts",
+          "instagram_basic",
+          "instagram_content_publish",
+        ];
 
     const defaultScopes = this.platform === "FACEBOOK" ? fbScopes : igScopes;
     const scopes = params.scopes || defaultScopes;
@@ -98,22 +105,92 @@ export class MetaPublishingProvider implements ISocialPublishingProvider {
     let finalAccountId = data.user_id || "meta_user";
 
     try {
-      // 1. Fetch user's managed Facebook Pages
+      // 1. Fetch user's managed Facebook Pages and linked Instagram accounts
       const accountsRes = await fetch(
-        `https://graph.facebook.com/v20.0/me/accounts?access_token=${data.access_token}&fields=id,name,category,access_token,picture{url}`
+        `https://graph.facebook.com/v20.0/me/accounts?access_token=${data.access_token}&fields=id,name,category,access_token,picture{url},instagram_business_account{id,username,name,profile_picture_url}`
       );
       if (accountsRes.ok) {
         const accountsData = await accountsRes.json();
+        console.log("[Meta OAuth] Managed accounts response:", JSON.stringify(accountsData, null, 2));
+
         if (accountsData.data && accountsData.data.length > 0) {
-          const page = accountsData.data[0];
-          realAccountName = page.name;
-          realHandle = `@${page.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`;
-          finalAccountId = page.id;
-          if (page.access_token) {
-            finalAccessToken = page.access_token;
-          }
-          if (page.picture?.data?.url) {
-            realAvatarUrl = page.picture.data.url;
+          if (this.platform === "INSTAGRAM") {
+            let foundIgId: string | null = null;
+            let pageTokenForIg: string | null = null;
+
+            // Check if any page already has instagram_business_account in accountsData
+            for (const page of accountsData.data) {
+              if (page.instagram_business_account?.id) {
+                foundIgId = page.instagram_business_account.id;
+                pageTokenForIg = page.access_token || data.access_token;
+                break;
+              }
+            }
+
+            // If not found in nested response, query each page directly
+            if (!foundIgId) {
+              for (const page of accountsData.data) {
+                try {
+                  const pCheck = await fetch(
+                    `https://graph.facebook.com/v20.0/${page.id}?fields=instagram_business_account&access_token=${page.access_token || data.access_token}`
+                  );
+                  if (pCheck.ok) {
+                    const pData = await pCheck.json();
+                    if (pData.instagram_business_account?.id) {
+                      foundIgId = pData.instagram_business_account.id;
+                      pageTokenForIg = page.access_token || data.access_token;
+                      break;
+                    }
+                  }
+                } catch (err) {
+                  console.warn("Direct page IG check failed:", err);
+                }
+              }
+            }
+
+            // Fetch exact Instagram profile (username, name, profile picture) directly from Instagram User ID
+            if (foundIgId && pageTokenForIg) {
+              finalAccountId = foundIgId;
+              finalAccessToken = pageTokenForIg;
+
+              try {
+                const igProfileRes = await fetch(
+                  `https://graph.facebook.com/v20.0/${foundIgId}?fields=id,username,name,profile_picture_url&access_token=${pageTokenForIg}`
+                );
+                if (igProfileRes.ok) {
+                  const igInfo = await igProfileRes.json();
+                  console.log("[Meta OAuth] Fetched Instagram Account Details:", igInfo);
+                  if (igInfo.username) {
+                    realHandle = `@${igInfo.username}`;
+                    realAccountName = igInfo.name || igInfo.username;
+                  }
+                  if (igInfo.profile_picture_url) {
+                    realAvatarUrl = igInfo.profile_picture_url;
+                  }
+                }
+              } catch (igProfileErr) {
+                console.warn("Failed to fetch Instagram account details directly:", igProfileErr);
+              }
+            } else {
+              // Fallback to first page
+              const page = accountsData.data[0];
+              realAccountName = `${page.name} (IG)`;
+              realHandle = `@${page.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`;
+              finalAccountId = page.id;
+              if (page.access_token) finalAccessToken = page.access_token;
+              if (page.picture?.data?.url) realAvatarUrl = page.picture.data.url;
+            }
+          } else {
+            const page = accountsData.data[0];
+            realAccountName = page.name;
+            realHandle = `@${page.name.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`;
+            finalAccountId = page.id;
+            if (page.access_token) {
+              finalAccessToken = page.access_token;
+            }
+            if (page.picture?.data?.url) {
+              realAvatarUrl = page.picture.data.url;
+            }
           }
         } else {
           // 2. Fallback to Facebook user profile name

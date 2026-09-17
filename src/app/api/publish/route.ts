@@ -195,6 +195,378 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Instagram / Meta Publishing
+    if (platform === "INSTAGRAM") {
+      if (!rawToken) {
+        return NextResponse.json({
+          success: false,
+          live: false,
+          requiresToken: true,
+          error:
+            "Instagram Access Token missing. Please reconnect Instagram in Social Accounts.",
+        });
+      }
+
+      const hasMedia = mediaUrls && mediaUrls.length > 0;
+      if (!hasMedia) {
+        return NextResponse.json({
+          success: false,
+          live: true,
+          error:
+            "Instagram-এ পোস্ট করার জন্য ছবি (Image) বা ভিডিও আবশ্যক। দয়া করে Content Studio-তে একটি ছবি যুক্ত বা AI দিয়ে জেনারেট করুন।",
+        });
+      }
+
+      let activeIgAccountId = rawPageId;
+      let activePageToken = rawToken;
+      let associatedFbPageId = "";
+
+      // 1. Auto-resolve Instagram Business Account ID & Page Token from Graph API
+      try {
+        const accountsRes = await fetch(
+          `https://graph.facebook.com/v20.0/me/accounts?access_token=${rawToken}&fields=id,name,access_token,instagram_business_account{id,username,name}`
+        );
+        if (accountsRes.ok) {
+          const accountsData = await accountsRes.json();
+          if (accountsData.data && accountsData.data.length > 0) {
+            // Find the page matching accountId or the first page with a linked IG account
+            const pageWithIg =
+              accountsData.data.find(
+                (p: any) =>
+                  p.instagram_business_account?.id === rawPageId ||
+                  p.id === rawPageId ||
+                  p.instagram_business_account?.id
+              ) || accountsData.data[0];
+
+            if (pageWithIg?.instagram_business_account?.id) {
+              activeIgAccountId = pageWithIg.instagram_business_account.id;
+              activePageToken = pageWithIg.access_token || rawToken;
+              associatedFbPageId = pageWithIg.id;
+              console.log(
+                `[Publish API] Auto-resolved Instagram Account: "${pageWithIg.instagram_business_account.username}" (ID: ${activeIgAccountId})`
+              );
+            } else {
+              associatedFbPageId = pageWithIg?.id || "";
+              if (pageWithIg?.access_token) {
+                activePageToken = pageWithIg.access_token;
+              }
+            }
+          }
+        }
+
+        // If rawPageId is a Page ID, check if it has a linked IG account directly
+        if (!activeIgAccountId || activeIgAccountId === rawPageId) {
+          const pageCheckRes = await fetch(
+            `https://graph.facebook.com/v20.0/${rawPageId}?fields=instagram_business_account{id,username}&access_token=${activePageToken}`
+          );
+          if (pageCheckRes.ok) {
+            const pageCheckData = await pageCheckRes.json();
+            if (pageCheckData.instagram_business_account?.id) {
+              activeIgAccountId = pageCheckData.instagram_business_account.id;
+              associatedFbPageId = rawPageId || "";
+            }
+          }
+        }
+      } catch (resolveErr) {
+        console.warn("[Publish API] Instagram auto-resolve error:", resolveErr);
+      }
+
+      if (!activeIgAccountId) {
+        return NextResponse.json({
+          success: false,
+          live: true,
+          error:
+            "আপনার ফেসবুক পেজের সাথে কোনো Instagram Professional/Creator অ্যাকাউন্ট যুক্ত পাওয়া যায়নি। দয়া করে Instagram অ্যাকাউন্টটি Professional-এ রূপান্তর করে Facebook Page-এর সাথে কানেক্ট করুন।",
+        });
+      }
+
+      try {
+        let publicImageUrl = mediaUrls[0];
+
+        // 2. Handle base64 image -> upload to Facebook Page as unpublished photo to obtain public CDN URL
+        if (publicImageUrl.startsWith("data:")) {
+          const matches = publicImageUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          if (matches && matches.length === 3) {
+            const mimeType = matches[1];
+            const buffer = Buffer.from(matches[2], "base64");
+            const blob = new Blob([buffer], { type: mimeType });
+
+            const uploadPageId = associatedFbPageId || "me";
+            const fbPhotoUrl = `https://graph.facebook.com/v20.0/${uploadPageId}/photos`;
+            const formData = new FormData();
+            formData.append("access_token", activePageToken);
+            formData.append("source", blob, "upload.png");
+            formData.append("published", "false");
+
+            const uploadRes = await fetch(fbPhotoUrl, {
+              method: "POST",
+              body: formData,
+            });
+            const uploadData = await uploadRes.json();
+
+            if (uploadData.id) {
+              const photoDetailsRes = await fetch(
+                `https://graph.facebook.com/v20.0/${uploadData.id}?fields=images&access_token=${activePageToken}`
+              );
+              if (photoDetailsRes.ok) {
+                const photoDetails = await photoDetailsRes.json();
+                if (photoDetails.images && photoDetails.images.length > 0) {
+                  publicImageUrl = photoDetails.images[0].source;
+                  console.log("[Publish API] Converted local image to Meta CDN URL for Instagram");
+                }
+              }
+            }
+          }
+        }
+
+        // 3. Step 1: Create Instagram Media Container
+        const containerUrl = `https://graph.facebook.com/v20.0/${activeIgAccountId}/media`;
+        const containerRes = await fetch(containerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image_url: publicImageUrl,
+            caption: caption || "",
+            access_token: activePageToken,
+          }),
+        });
+
+        const containerData = await containerRes.json();
+        console.log("[Publish API] Instagram container creation response:", containerData);
+
+        if (!containerRes.ok || !containerData.id) {
+          return NextResponse.json({
+            success: false,
+            live: true,
+            error: containerData.error?.message || "Instagram media container creation failed.",
+            metaError: containerData.error,
+          });
+        }
+
+        // 4. Step 2: Publish the Container to Live Instagram
+        const publishUrl = `https://graph.facebook.com/v20.0/${activeIgAccountId}/media_publish`;
+        const publishRes = await fetch(publishUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            creation_id: containerData.id,
+            access_token: activePageToken,
+          }),
+        });
+
+        const publishData = await publishRes.json();
+        console.log("[Publish API] Instagram media publish response:", publishData);
+
+        if (!publishRes.ok || !publishData.id) {
+          return NextResponse.json({
+            success: false,
+            live: true,
+            error: publishData.error?.message || "Failed to publish Instagram media container.",
+            metaError: publishData.error,
+          });
+        }
+
+        // 5. Step 3: Fetch post permalink
+        let permalink = `https://instagram.com`;
+        try {
+          const permalinkRes = await fetch(
+            `https://graph.facebook.com/v20.0/${publishData.id}?fields=permalink&access_token=${activePageToken}`
+          );
+          if (permalinkRes.ok) {
+            const pData = await permalinkRes.json();
+            if (pData.permalink) {
+              permalink = pData.permalink;
+            }
+          }
+        } catch {}
+
+        return NextResponse.json({
+          success: true,
+          live: true,
+          postId: publishData.id,
+          postUrl: permalink,
+          message: "Successfully published live to Instagram!",
+        });
+      } catch (igErr: any) {
+        console.error("[Publish API] Instagram publish error:", igErr);
+        return NextResponse.json({
+          success: false,
+          live: true,
+          error: igErr.message || "Failed to publish to Instagram Graph API",
+        });
+      }
+    }
+
+    // Threads Publishing
+    if (platform === "THREADS") {
+      if (!rawToken) {
+        return NextResponse.json({
+          success: false,
+          live: false,
+          requiresToken: true,
+          error:
+            "Threads Access Token missing. Please connect your Threads account in Social Accounts.",
+        });
+      }
+
+      let activeUserId = rawPageId;
+      const activeToken = rawToken;
+
+      try {
+        if (!activeUserId) {
+          const meRes = await fetch(
+            `https://graph.threads.net/v1.0/me?fields=id,username&access_token=${activeToken}`
+          );
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            activeUserId = meData.id;
+          }
+        }
+      } catch (e) {
+        console.warn("[Publish API] Threads auto-resolve user error:", e);
+      }
+
+      const targetId = activeUserId || "me";
+
+      try {
+        const hasMedia = mediaUrls && mediaUrls.length > 0;
+        const containerBody = new URLSearchParams();
+        containerBody.append("access_token", activeToken);
+
+        if (hasMedia) {
+          containerBody.append("media_type", "IMAGE");
+          containerBody.append("image_url", mediaUrls[0]);
+          if (caption) containerBody.append("text", caption);
+        } else {
+          containerBody.append("media_type", "TEXT");
+          containerBody.append("text", caption || "");
+        }
+
+        const createRes = await fetch(`https://graph.threads.net/v1.0/${targetId}/threads`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: containerBody.toString(),
+        });
+
+        const createData = await createRes.json();
+        if (!createRes.ok || !createData.id) {
+          return NextResponse.json({
+            success: false,
+            live: true,
+            error: createData.error?.message || "Failed to create Threads post container.",
+          });
+        }
+
+        // Processing pause for container readiness
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        const publishBody = new URLSearchParams();
+        publishBody.append("creation_id", createData.id);
+        publishBody.append("access_token", activeToken);
+
+        const publishRes = await fetch(
+          `https://graph.threads.net/v1.0/${targetId}/threads_publish`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: publishBody.toString(),
+          }
+        );
+
+        const publishData = await publishRes.json();
+        if (!publishRes.ok || !publishData.id) {
+          return NextResponse.json({
+            success: false,
+            live: true,
+            error: publishData.error?.message || "Failed to publish to Threads.",
+          });
+        }
+
+        return NextResponse.json({
+          success: true,
+          live: true,
+          postId: publishData.id,
+          postUrl: "https://www.threads.net",
+          message: "Successfully published live to Threads!",
+        });
+      } catch (thErr: any) {
+        return NextResponse.json({
+          success: false,
+          live: true,
+          error: thErr.message || "Failed to publish to Threads API",
+        });
+      }
+    }
+
+    // Google Business Profile (GMB) Publishing
+    if (platform === "GOOGLE_BUSINESS") {
+      const activeLocationName = rawPageId || process.env.GOOGLE_BUSINESS_LOCATION_NAME;
+
+      if (rawToken && activeLocationName) {
+        try {
+          const postPayload: any = {
+            languageCode: "en-US",
+            summary: (caption || "").slice(0, 1500),
+            topicType: "STANDARD",
+          };
+
+          if (mediaUrls && mediaUrls.length > 0) {
+            postPayload.media = [
+              {
+                mediaFormat: "PHOTO",
+                sourceUrl: mediaUrls[0],
+              },
+            ];
+          }
+
+          const gmbRes = await fetch(
+            `https://mybusiness.googleapis.com/v4/${activeLocationName}/localPosts`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${rawToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(postPayload),
+            }
+          );
+
+          if (gmbRes.ok) {
+            const gmbData = await gmbRes.json();
+            return NextResponse.json({
+              success: true,
+              live: true,
+              postId: gmbData.name || `gmb_${Date.now()}`,
+              postUrl: gmbData.searchUrl || "https://www.google.com/maps",
+              message: "Successfully published live to Google Business Profile!",
+            });
+          } else {
+            const errData = await gmbRes.json().catch(() => ({}));
+            return NextResponse.json({
+              success: false,
+              live: true,
+              error: errData.error?.message || `Google Business API error (${gmbRes.status})`,
+            });
+          }
+        } catch (gErr: any) {
+          return NextResponse.json({
+            success: false,
+            live: true,
+            error: gErr.message || "Failed to communicate with Google My Business API",
+          });
+        }
+      }
+
+      // Simulated publication for demo / non-token mode
+      return NextResponse.json({
+        success: true,
+        live: false,
+        postId: `gmb_simulated_${Date.now()}`,
+        postUrl: "https://www.google.com/maps",
+        message: "Google Business Profile update published successfully (simulated/scheduled).",
+      });
+    }
+
     // Default simulation for unlinked accounts
     return NextResponse.json({
       success: true,

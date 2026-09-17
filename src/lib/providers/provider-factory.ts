@@ -2,6 +2,8 @@ import { PlatformType } from "../types";
 import { MockSocialProvider } from "./mock-provider";
 import { MetaPublishingProvider } from "./meta-provider";
 import { LinkedInPublishingProvider } from "./linkedin-provider";
+import { ThreadsPublishingProvider } from "./threads-provider";
+import { GoogleBusinessPublishingProvider } from "./google-business-provider";
 import { StagedPublishingProvider } from "./staged-provider";
 import { ISocialPublishingProvider } from "./social-publishing-provider";
 import { FeatureFlagService } from "../features/feature-flags";
@@ -59,6 +61,10 @@ export class ProviderFactory {
         return new MetaPublishingProvider("INSTAGRAM");
       case "LINKEDIN":
         return new LinkedInPublishingProvider();
+      case "THREADS":
+        return new ThreadsPublishingProvider();
+      case "GOOGLE_BUSINESS":
+        return new GoogleBusinessPublishingProvider();
       default:
         return new StagedPublishingProvider(platform);
     }
@@ -75,6 +81,7 @@ export class ProviderFactory {
       "LINKEDIN",
       "X",
       "THREADS",
+      "GOOGLE_BUSINESS",
       "PINTEREST",
       "YOUTUBE",
       "TIKTOK",

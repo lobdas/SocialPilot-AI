@@ -8,7 +8,8 @@ export type PlatformType =
   | "THREADS"
   | "PINTEREST"
   | "YOUTUBE"
-  | "TIKTOK";
+  | "TIKTOK"
+  | "GOOGLE_BUSINESS";
 
 export type ContentStatus =
   | "DRAFT"

@@ -159,6 +159,19 @@ export class AIService {
       };
     }
 
+    // Google Business Profile (GMB)
+    if (params.targetPlatforms.includes("GOOGLE_BUSINESS")) {
+      const gmbCaption = `📢 Business Update from ${brandName}:\n\n${topic}.\n\nLooking to elevate your local reach, streamline operations, and drive real customer action? Our team is here to help you grow with proven, reliable solutions.\n\n📍 Visit our location or connect with us online today!\n\n👉 ${cta}`;
+      variants["GOOGLE_BUSINESS"] = {
+        platform: "GOOGLE_BUSINESS",
+        caption: gmbCaption.slice(0, 1500),
+        hashtags: [], // Google Business Profile posts perform best without hashtag spam
+        ctaText: "Learn More",
+        ctaUrl: "https://socialpilot.ai",
+        characterCount: Math.min(gmbCaption.length, 1500),
+      };
+    }
+
     return { variants, isLiveOpenAI: false };
   }
 

@@ -41,8 +41,6 @@ export default function LandingPage() {
     { name: "X (Twitter)", status: "Staged / In Dev", color: "#FFFFFF" },
     { name: "Threads", status: "Staged / In Dev", color: "#FFFFFF" },
     { name: "Pinterest", status: "Coming Soon", color: "#BD081C" },
-    { name: "YouTube", status: "Coming Soon", color: "#FF0000" },
-    { name: "TikTok", status: "Coming Soon", color: "#00F2FE" },
   ];
 
   const CORE_FEATURES = [

@@ -69,6 +69,7 @@ Formatting & Platform Requirements:
 - "FACEBOOK": Engaging conversational post, relatable community angle, question to prompt comments and shares, clear link/action CTA, 2-3 hashtags.
 - "THREADS": Conversational, hot take or thought starter, feels like a real human message, 1-2 sentences or short list, 0-1 hashtags.
 - "PINTEREST": Descriptive keyword-rich pin caption explaining the idea/guide, inspiring aesthetic tone, 3-5 hashtags.
+- "GOOGLE_BUSINESS": Clear, professional local business update or promotional announcement (under 1500 chars). High-intent Local SEO tone, strong business value, action-oriented CTA (e.g. "Call Now", "Learn More", "Book Online", "Get Offer"). Do NOT use hashtags.
 
 Return ONLY a valid JSON object matching this structure:
 {

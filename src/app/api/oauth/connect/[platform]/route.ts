@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MetaPublishingProvider } from "@/lib/providers/meta-provider";
 import { LinkedInPublishingProvider } from "@/lib/providers/linkedin-provider";
+import { ThreadsPublishingProvider } from "@/lib/providers/threads-provider";
 import { PlatformType } from "@/lib/types";
 
 export async function GET(
@@ -27,6 +28,12 @@ export async function GET(
 
   if (platform === "LINKEDIN") {
     const provider = new LinkedInPublishingProvider();
+    const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
+    return NextResponse.redirect(authUrl);
+  }
+
+  if (platform === "THREADS") {
+    const provider = new ThreadsPublishingProvider();
     const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
     return NextResponse.redirect(authUrl);
   }

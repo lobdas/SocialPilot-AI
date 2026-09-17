@@ -69,7 +69,7 @@ const INITIAL_DATA: DemoStoreData = {
       prohibitedClaims: "Never guarantee exact ROI percentages, never claim 100% automated virality without human review",
       approvedExamples: "Stop wasting 15+ hours weekly reformatting captions. Scale your native reach with SocialPilot AI.",
       faqs: [
-        { question: "What platforms do you support?", answer: "We support Meta (Facebook & Instagram), LinkedIn, X, Threads, Pinterest, YouTube, and TikTok." },
+        { question: "What platforms do you support?", answer: "We support Meta (Facebook & Instagram), LinkedIn, X, Threads, and Pinterest." },
         { question: "Does this include AI image generation?", answer: "Yes, built-in multi-aspect ratio generation and prompt engineering are included." }
       ]
     },

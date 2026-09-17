@@ -59,10 +59,10 @@ const INTEGRATIONS: IntegrationItem[] = [
   {
     id: "threads",
     name: "Threads by Meta",
-    category: "IN_DEVELOPMENT",
+    category: "AVAILABLE",
     desc: "Publish conversational text threads, quotes, and images to Meta's fast-growing microblogging network.",
     color: "#FFFFFF",
-    capabilities: ["Text Threads (500 chars)", "Single Image", "Reply Feeds"],
+    capabilities: ["Text Threads (500 chars)", "Single Image", "Reply Feeds", "OAuth 2.0 Direct Connect"],
     protocol: "Threads Publishing API v1.0",
   },
 
@@ -75,24 +75,6 @@ const INTEGRATIONS: IntegrationItem[] = [
     color: "#BD081C",
     capabilities: ["Standard Pins (2:3 aspect)", "Board Organization", "Rich Link Attributes"],
     protocol: "Pinterest API v5 (Planned)",
-  },
-  {
-    id: "youtube",
-    name: "YouTube Shorts & Community",
-    category: "COMING_SOON",
-    desc: "YouTube Shorts video uploads and community text/poll posts with description chapter hooks.",
-    color: "#FF0000",
-    capabilities: ["Shorts Video Publishing", "Community Polls", "Subscriber Analytics"],
-    protocol: "YouTube Data API v3 (Planned)",
-  },
-  {
-    id: "tiktok",
-    name: "TikTok",
-    category: "COMING_SOON",
-    desc: "Direct video publishing to business and creator accounts with sound metadata and caption hashtags.",
-    color: "#00F2FE",
-    capabilities: ["Direct Video Upload", "Commercial Sounds", "TikTok Analytics"],
-    protocol: "TikTok Content Posting API (Planned)",
   },
 ];
 

@@ -140,6 +140,7 @@ export default function ContentCalendarPage() {
             <option value="INSTAGRAM">Instagram</option>
             <option value="FACEBOOK">Facebook</option>
             <option value="THREADS">Threads</option>
+            <option value="GOOGLE_BUSINESS">Google Business (GMB)</option>
             <option value="PINTEREST">Pinterest</option>
           </select>
 

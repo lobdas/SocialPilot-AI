@@ -23,10 +23,9 @@ const PLATFORMS_CATALOG: { id: PlatformType; name: string; desc: string; iconCol
   { id: "X", name: "X (Twitter)", desc: "Direct Posts, Threads & Media", iconColor: "#FFFFFF" },
   { id: "INSTAGRAM", name: "Instagram", desc: "Business & Creator Accounts (Feed & Stories)", iconColor: "#E4405F" },
   { id: "FACEBOOK", name: "Facebook", desc: "Pages & Business Groups", iconColor: "#1877F2" },
+  { id: "GOOGLE_BUSINESS", name: "Google Business Profile", desc: "Local Search, Maps & Store Updates (GMB)", iconColor: "#4285F4" },
   { id: "THREADS", name: "Threads", desc: "Conversational Threads by Meta", iconColor: "#FFFFFF" },
   { id: "PINTEREST", name: "Pinterest", desc: "Pins & Board Automation", iconColor: "#BD081C" },
-  { id: "YOUTUBE", name: "YouTube", desc: "Shorts & Video Community Posts", iconColor: "#FF0000" },
-  { id: "TIKTOK", name: "TikTok", desc: "Short-form Video Publishing", iconColor: "#00F2FE" },
 ];
 
 export default function SocialAccountsPage() {
@@ -108,8 +107,8 @@ export default function SocialAccountsPage() {
   const handleConnect = (platform: PlatformType) => {
     setConnectingPlatform(platform);
 
-    // If live OAuth endpoint is available for Meta/LinkedIn
-    const livePlatforms: PlatformType[] = ["FACEBOOK", "INSTAGRAM", "LINKEDIN"];
+    // If live OAuth endpoint is available for Meta/LinkedIn/Threads
+    const livePlatforms: PlatformType[] = ["FACEBOOK", "INSTAGRAM", "LINKEDIN", "THREADS"];
     const isLive = livePlatforms.includes(platform) && process.env.NEXT_PUBLIC_DEMO_MODE !== "true";
 
     if (isLive) {
@@ -122,7 +121,16 @@ export default function SocialAccountsPage() {
 
     // Simulation / Quick connect for development & non-OAuth channels
     setTimeout(() => {
-      store.connectAccount(platform);
+      if (platform === "GOOGLE_BUSINESS") {
+        store.connectAccount(
+          "GOOGLE_BUSINESS",
+          "Apex Growth (Google Business Profile)",
+          "@apexgrowth_maps",
+          "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=120&auto=format&fit=crop&q=80"
+        );
+      } else {
+        store.connectAccount(platform);
+      }
       setConnectingPlatform(null);
       showToast(`🎉 ${platform} connected! Button updated to Manage.`, "success");
     }, 700);

@@ -32,6 +32,7 @@ const PLATFORM_COLORS: Record<PlatformType, { bg: string; text: string; border: 
   PINTEREST: { bg: "bg-[#BD081C]/10", text: "text-[#BD081C]", border: "border-[#BD081C]/30", name: "Pinterest" },
   YOUTUBE: { bg: "bg-[#FF0000]/10", text: "text-[#FF0000]", border: "border-[#FF0000]/30", name: "YouTube" },
   TIKTOK: { bg: "bg-[#00F2FE]/10", text: "text-[#00F2FE]", border: "border-[#00F2FE]/30", name: "TikTok" },
+  GOOGLE_BUSINESS: { bg: "bg-[#4285F4]/10", text: "text-[#4285F4]", border: "border-[#4285F4]/30", name: "Google Business" },
 };
 
 export default function PostsManagementPage() {
@@ -236,6 +237,7 @@ export default function PostsManagementPage() {
             <option value="INSTAGRAM">Instagram</option>
             <option value="X">X (Twitter)</option>
             <option value="THREADS">Threads</option>
+            <option value="GOOGLE_BUSINESS">Google Business (GMB)</option>
             <option value="PINTEREST">Pinterest</option>
           </select>
         </div>
