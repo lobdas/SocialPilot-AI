@@ -8,8 +8,7 @@ import {
   AlertCircle,
   Sparkles,
   ShieldAlert,
-  Plus,
-  Trash2,
+  Mail,
 } from "lucide-react";
 import { useDemoStore } from "@/lib/use-demo-store";
 import { Brand } from "@/lib/types";
@@ -30,7 +29,7 @@ export default function BrandBrainPage() {
 
   const handleSave = () => {
     store.updateBrand(form.id, form);
-    showToast("🧠 Brand Brain guidelines saved! All future AI outputs will adhere to these parameters.");
+    showToast("🧠 Brand Brain guidelines saved! All future AI outputs and alerts will use these parameters.");
   };
 
   return (
@@ -52,13 +51,15 @@ export default function BrandBrainPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Define tone, target audiences, and prohibited claims to ensure all AI-generated copy matches your brand DNA.
+            Teach AI how to write for your brand. Set writing rules, forbidden words, and sample posts so every AI output matches your brand identity.
           </p>
         </div>
 
+        {/* Save Guidelines Button */}
         <button
+          type="button"
           onClick={handleSave}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#D4FF32] text-[#0B1020] font-bold text-xs shadow-[0_0_15px_rgba(212,255,50,0.25)] hover:bg-[#C2ED25] transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#D4FF32] text-[#0B1020] font-bold text-xs shadow-[0_0_15px_rgba(212,255,50,0.25)] hover:bg-[#C2ED25] transition-all cursor-pointer self-start sm:self-auto"
         >
           <Save className="w-3.5 h-3.5" />
           <span>Save Guidelines</span>
@@ -69,9 +70,15 @@ export default function BrandBrainPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Core Identity */}
         <div className="p-5 rounded-2xl bg-[#121A2B] border border-[rgba(255,255,255,0.08)] space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-white">
-            1. Core Identity & Voice
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-white">
+              1. Core Identity & Voice
+            </h2>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: form.primaryColor || "#D4FF32" }} />
+              <span className="text-white font-medium">{form.name}</span>
+            </div>
+          </div>
 
           <div>
             <label className="text-[11px] font-medium text-slate-300 block mb-1">Brand Name</label>
@@ -81,6 +88,27 @@ export default function BrandBrainPage() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full px-3 py-1.5 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.08)] text-xs text-white focus:outline-none focus:border-[#D4FF32]/50"
             />
+          </div>
+
+          {/* Brand Email field */}
+          <div>
+            <label className="text-[11px] font-medium text-slate-300 flex items-center justify-between mb-1">
+              <span>Brand Email (Alerts & Reports)</span>
+              <span className="text-[10px] text-[#D4FF32] font-semibold">Active Recipient</span>
+            </label>
+            <div className="relative">
+              <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="email"
+                value={form.brandEmail || ""}
+                onChange={(e) => setForm({ ...form, brandEmail: e.target.value })}
+                placeholder="e.g. contact@brand.com"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.08)] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4FF32]/50"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">
+              All post published alerts, schedule confirmations, and performance reports for this brand will be dispatched to this email address.
+            </p>
           </div>
 
           <div>
@@ -120,38 +148,43 @@ export default function BrandBrainPage() {
           </div>
         </div>
 
-        {/* Guardrails & Prohibitions */}
+        {/* 2. AI Content Rules & Writing Style */}
         <div className="p-5 rounded-2xl bg-[#121A2B] border border-[rgba(255,255,255,0.08)] space-y-4">
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300">
-            <ShieldAlert className="w-4 h-4" />
-            <span>2. Guardrails & Prohibited Claims</span>
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#D4FF32]">
+            <Sparkles className="w-4 h-4 text-[#D4FF32]" />
+            <span>2. AI Content Rules & Writing Style</span>
           </div>
 
+          {/* Negative Rules */}
           <div>
-            <label className="text-[11px] font-medium text-slate-300 block mb-1">
-              Prohibited Claims & Forbidden Terms
+            <label className="text-[11px] font-semibold text-slate-200 block mb-1">
+              🚫 What AI Must Avoid (Forbidden Topics & Claims)
             </label>
             <p className="text-[10px] text-slate-400 mb-2 leading-normal">
-              SocialPilot AI strictly validates generated content against these restrictions before proposing it to your team.
+              List forbidden words, false guarantees, or sensitive topics that AI must <strong>NEVER</strong> mention in your posts.
             </p>
             <textarea
               rows={4}
               value={form.prohibitedClaims || ""}
               onChange={(e) => setForm({ ...form, prohibitedClaims: e.target.value })}
-              placeholder="e.g. Never guarantee exact ROI percentages, never promise 100% automated virality without human review..."
+              placeholder="e.g. Never guarantee exact ROI percentages, never promise overnight results, avoid buzzwords like 'game-changer', never mention competitor pricing..."
               className="w-full p-2.5 rounded-lg bg-[#0B1020] border border-amber-500/30 text-xs text-amber-200 placeholder-slate-600 focus:outline-none focus:border-amber-400 resize-none leading-relaxed"
             />
           </div>
 
+          {/* Positive Style Examples */}
           <div>
-            <label className="text-[11px] font-medium text-slate-300 block mb-1">
-              Golden Example Posts (Few-Shot Prompting)
+            <label className="text-[11px] font-semibold text-slate-200 block mb-1">
+              ✨ How AI Should Write (Best Sample Posts)
             </label>
+            <p className="text-[10px] text-slate-400 mb-2 leading-normal">
+              Paste 1-2 of your best past posts. AI will analyze the structure, hooks, and tone to write all future posts in this exact style.
+            </p>
             <textarea
               rows={4}
               value={form.approvedExamples || ""}
               onChange={(e) => setForm({ ...form, approvedExamples: e.target.value })}
-              placeholder="Paste 1-2 exemplary posts that perfectly reflect your brand style..."
+              placeholder="Paste 1-2 of your best posts here so AI learns your brand's unique writing rhythm, tone, and line formatting..."
               className="w-full p-2.5 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.08)] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4FF32]/50 resize-none leading-relaxed"
             />
           </div>

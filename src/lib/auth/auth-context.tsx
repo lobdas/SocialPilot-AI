@@ -18,6 +18,7 @@ interface AuthContextType {
   register: (data: { name: string; workspaceName: string; email: string; pass: string }) => Promise<{ success: boolean; error?: string }>;
   demoLogin: () => void;
   logout: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -117,6 +118,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    if (!user) return;
+    const updated = { ...user, ...updates };
+    const session = getClientSession();
+    if (session) {
+      saveClientSession({ ...session, user: updated });
+    }
+    setUser(updated);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -127,6 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         demoLogin,
         logout,
+        updateUser,
       }}
     >
       {children}

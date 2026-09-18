@@ -41,15 +41,6 @@ const INITIAL_DATA: DemoStoreData = {
       timezone: "America/New_York",
       language: "en",
     },
-    {
-      id: "ws-2",
-      name: "Nordic Minimalist Studio",
-      slug: "nordic-studio",
-      industry: "E-Commerce & DTC",
-      country: "SE",
-      timezone: "Europe/Stockholm",
-      language: "en",
-    },
   ],
   activeWorkspaceId: "ws-1",
   brands: [
@@ -58,6 +49,7 @@ const INITIAL_DATA: DemoStoreData = {
       workspaceId: "ws-1",
       name: "SocialPilot AI",
       slug: "socialpilot",
+      brandEmail: "hello@socialpilot.ai",
       tagline: "Create once. Publish everywhere. Manage everything.",
       description: "All-in-one AI social media management platform for high-velocity teams.",
       primaryColor: "#D4FF32",
@@ -78,6 +70,7 @@ const INITIAL_DATA: DemoStoreData = {
       workspaceId: "ws-1",
       name: "Lumina Skincare",
       slug: "lumina-skincare",
+      brandEmail: "care@luminaskincare.com",
       tagline: "Science-backed radiant daily wellness",
       description: "Clean dermatological skincare for sensitive skin.",
       primaryColor: "#FDA4AF",
@@ -87,6 +80,21 @@ const INITIAL_DATA: DemoStoreData = {
       preferredLanguage: "en",
       targetAudience: "Wellness enthusiasts aged 24-42 seeking clean, dermatologically backed routines",
       prohibitedClaims: "Never claim to cure medical conditions or promise overnight anti-aging results",
+    },
+    {
+      id: "brand-3",
+      workspaceId: "ws-1",
+      name: "Nordic Minimalist Studio",
+      slug: "nordic-studio",
+      brandEmail: "design@nordicstudio.com",
+      tagline: "Clean Scandinavian aesthetic for modern lifestyle brands",
+      description: "Design studio and e-commerce lifestyle products.",
+      primaryColor: "#38BDF8",
+      secondaryColor: "#E0E7FF",
+      brandVoice: "Minimalist, sleek, modern, and inspiring",
+      tone: "Sophisticated and crisp",
+      preferredLanguage: "en",
+      targetAudience: "Design lovers, tech creatives, and modern home enthusiasts",
     },
   ],
   activeBrandId: "brand-1",
@@ -380,17 +388,23 @@ class DemoStore {
         localStorage.removeItem("socialpilot_demo_store_v1");
         localStorage.removeItem("socialpilot_demo_store_v2");
         localStorage.removeItem("socialpilot_demo_store_v3");
+        localStorage.removeItem("socialpilot_demo_store_v4");
 
-        const saved = localStorage.getItem("socialpilot_demo_store_v4");
+        const saved = localStorage.getItem("socialpilot_demo_store_v5");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.brands) && Array.isArray(parsed.posts)) {
+            // Ensure single workspace per account
+            if (parsed.workspaces && parsed.workspaces.length > 1) {
+              parsed.workspaces = [parsed.workspaces[0]];
+              parsed.activeWorkspaceId = parsed.workspaces[0].id;
+            }
             this.data = parsed;
             this.notify();
             return;
           }
         } else {
-          // Initialize fresh v4 store
+          // Initialize fresh v5 store
           this.persist();
         }
       } catch (e) {
@@ -409,7 +423,7 @@ class DemoStore {
           }
           return value;
         });
-        localStorage.setItem("socialpilot_demo_store_v4", serialized);
+        localStorage.setItem("socialpilot_demo_store_v5", serialized);
       } catch (e) {
         console.warn("Storage quota exceeded; retained cleanly in active memory:", e);
       }
@@ -474,6 +488,11 @@ class DemoStore {
     this.persist();
   }
 
+  updateWorkspace(id: string, updates: Partial<Workspace>) {
+    this.data.workspaces = this.data.workspaces.map((w) => (w.id === id ? { ...w, ...updates } : w));
+    this.persist();
+  }
+
   updateBrand(id: string, updates: Partial<Brand>) {
     this.data.brands = this.data.brands.map((b) => (b.id === id ? { ...b, ...updates } : b));
     this.persist();
@@ -488,6 +507,22 @@ class DemoStore {
     this.data.activeBrandId = newBrand.id;
     this.persist();
     return newBrand;
+  }
+
+  addApprovalRequest(request: Omit<ApprovalRequestItem, "id" | "createdAt" | "comments"> & {
+    id?: string;
+    createdAt?: string;
+    comments?: ApprovalRequestItem["comments"];
+  }): ApprovalRequestItem {
+    const newRequest: ApprovalRequestItem = {
+      id: request.id || `appr-${Date.now()}`,
+      createdAt: request.createdAt || new Date().toISOString(),
+      comments: request.comments || [],
+      ...request,
+    };
+    this.data.approvalRequests = [newRequest, ...this.data.approvalRequests];
+    this.persist();
+    return newRequest;
   }
 
   addApprovalComment(requestId: string, message: string, authorName: string, isExternalClient = false) {

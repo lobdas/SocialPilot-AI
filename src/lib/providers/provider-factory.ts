@@ -4,6 +4,9 @@ import { MetaPublishingProvider } from "./meta-provider";
 import { LinkedInPublishingProvider } from "./linkedin-provider";
 import { ThreadsPublishingProvider } from "./threads-provider";
 import { GoogleBusinessPublishingProvider } from "./google-business-provider";
+import { XPublishingProvider } from "./x-provider";
+import { YouTubePublishingProvider } from "./youtube-provider";
+import { PinterestPublishingProvider } from "./pinterest-provider";
 import { StagedPublishingProvider } from "./staged-provider";
 import { ISocialPublishingProvider } from "./social-publishing-provider";
 import { FeatureFlagService } from "../features/feature-flags";
@@ -65,6 +68,12 @@ export class ProviderFactory {
         return new ThreadsPublishingProvider();
       case "GOOGLE_BUSINESS":
         return new GoogleBusinessPublishingProvider();
+      case "X":
+        return new XPublishingProvider();
+      case "YOUTUBE":
+        return new YouTubePublishingProvider();
+      case "PINTEREST":
+        return new PinterestPublishingProvider();
       default:
         return new StagedPublishingProvider(platform);
     }

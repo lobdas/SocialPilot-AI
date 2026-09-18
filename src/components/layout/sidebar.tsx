@@ -9,13 +9,11 @@ import {
   LayoutDashboard,
   PenTool,
   Calendar,
-  Image as ImageIcon,
   Inbox,
   BarChart3,
   Layers,
   CheckSquare,
   BrainCircuit,
-  Users,
   Share2,
   Settings,
   ChevronDown,
@@ -24,6 +22,8 @@ import {
   Zap,
   RotateCcw,
   LogOut,
+  Plus,
+  X,
 } from "lucide-react";
 import { useDemoStore } from "@/lib/use-demo-store";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -41,7 +41,6 @@ const NAV_ITEMS = [
   { name: "Approvals", href: "/app/approvals", icon: CheckSquare, badgeCount: 1 },
   { name: "Brand Brain", href: "/app/brand-brain", icon: BrainCircuit, badge: "PRO" },
   { name: "Social Accounts", href: "/app/social-accounts", icon: Share2 },
-  { name: "Team & Roles", href: "/app/team", icon: Users },
   { name: "Settings", href: "/app/settings", icon: Settings },
 ];
 
@@ -49,8 +48,33 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data, activeBrand, activeWorkspace, store } = useDemoStore();
   const { user, logout } = useAuth();
-  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [showBrandMenu, setShowBrandMenu] = useState(false);
+  const [isCreateBrandOpen, setIsCreateBrandOpen] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [newBrandEmail, setNewBrandEmail] = useState("");
+  const [newBrandTagline, setNewBrandTagline] = useState("");
+  const [newBrandColor, setNewBrandColor] = useState("#D4FF32");
+
+  const handleCreateBrand = () => {
+    if (!newBrandName.trim()) return;
+    store.addBrand({
+      workspaceId: activeWorkspace?.id || "ws-1",
+      name: newBrandName.trim(),
+      slug: newBrandName.trim().toLowerCase().replace(/\s+/g, "-"),
+      brandEmail: newBrandEmail.trim() || undefined,
+      tagline: newBrandTagline.trim() || undefined,
+      primaryColor: newBrandColor,
+      secondaryColor: "#C4B5FD",
+      brandVoice: "Authentic, clear, engaging",
+      tone: "Professional yet conversational",
+      preferredLanguage: "en",
+    });
+    setNewBrandName("");
+    setNewBrandEmail("");
+    setNewBrandTagline("");
+    setNewBrandColor("#D4FF32");
+    setIsCreateBrandOpen(false);
+  };
 
   return (
     <aside className="w-64 flex-shrink-0 bg-[#0B1020] border-r border-[rgba(255,255,255,0.08)] flex flex-col h-screen select-none z-30">
@@ -69,97 +93,117 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Workspace & Brand Switchers */}
-      <div className="p-3 border-b border-[rgba(255,255,255,0.08)] space-y-2">
-        {/* Workspace Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setShowWorkspaceMenu(!showWorkspaceMenu);
-              setShowBrandMenu(false);
-            }}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#121A2B] hover:bg-[#182238] border border-[rgba(255,255,255,0.08)] text-xs text-slate-300 transition-colors"
-          >
-            <div className="flex items-center gap-2 truncate">
-              <Building2 className="w-3.5 h-3.5 text-[#D4FF32]" />
-              <span className="font-medium truncate">{activeWorkspace?.name}</span>
+      {/* Workspace Header & Brand Switcher */}
+      <div className="p-3 border-b border-[rgba(255,255,255,0.08)] space-y-2.5">
+        {/* Organization / Single Workspace Header */}
+        <div className="flex items-center justify-between px-2.5 py-2 rounded-lg bg-[#121A2B] border border-[rgba(255,255,255,0.06)] shadow-inner">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-md bg-[#182238] flex items-center justify-center border border-white/5 flex-shrink-0 text-[#D4FF32]">
+              <Building2 className="w-3.5 h-3.5" />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-          </button>
-
-          {showWorkspaceMenu && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-[#182238] border border-[rgba(255,255,255,0.12)] rounded-lg shadow-xl py-1 z-50">
-              <div className="px-2.5 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                Workspaces
+            <div className="min-w-0">
+              <div className="text-[9px] text-slate-400 uppercase font-mono tracking-wider leading-none">
+                Workspace
               </div>
-              {data.workspaces.map((ws) => (
-                <button
-                  key={ws.id}
-                  onClick={() => {
-                    store.setActiveWorkspace(ws.id);
-                    setShowWorkspaceMenu(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 text-xs text-slate-200 hover:bg-[#1E2A44] flex items-center justify-between"
-                >
-                  <span className="truncate">{ws.name}</span>
-                  {ws.id === activeWorkspace?.id && <Check className="w-3.5 h-3.5 text-[#D4FF32]" />}
-                </button>
-              ))}
+              <div
+                className="font-semibold text-xs text-white truncate leading-snug mt-0.5"
+                title={activeWorkspace?.name || "Apex Growth Agency"}
+              >
+                {activeWorkspace?.name || "Apex Growth Agency"}
+              </div>
             </div>
-          )}
+          </div>
+          <Link
+            href="/app/settings"
+            title="Workspace Settings"
+            className="text-slate-500 hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors"
+          >
+            <Settings className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        {/* Brand Selector */}
+        {/* Brand Selector Dropdown */}
         <div className="relative">
+          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1 pb-1 flex items-center justify-between">
+            <span>Active Brand</span>
+            <span className="text-[9px] font-mono text-slate-500">{data.brands.length} Brands</span>
+          </div>
           <button
-            onClick={() => {
-              setShowBrandMenu(!showBrandMenu);
-              setShowWorkspaceMenu(false);
-            }}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#121A2B]/60 hover:bg-[#182238] border border-[rgba(255,255,255,0.05)] text-xs text-slate-300 transition-colors"
+            onClick={() => setShowBrandMenu(!showBrandMenu)}
+            className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg bg-[#182238] hover:bg-[#1E2A44] border border-[rgba(255,255,255,0.08)] hover:border-[#D4FF32]/40 text-xs text-slate-200 transition-all shadow-sm group cursor-pointer"
           >
-            <div className="flex items-center gap-2 truncate">
+            <div className="flex items-center gap-2 truncate min-w-0">
               <span
-                className="w-2 h-2 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-2 ring-white/10"
                 style={{ backgroundColor: activeBrand?.primaryColor || "#D4FF32" }}
               />
-              <span className="text-[11px] text-slate-400">Brand:</span>
-              <span className="font-medium truncate text-white">{activeBrand?.name}</span>
+              <span className="font-semibold truncate text-white group-hover:text-[#D4FF32] transition-colors">
+                {activeBrand?.name || "Select Brand"}
+              </span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            <ChevronDown
+              className={cn("w-3.5 h-3.5 text-slate-400 transition-transform", showBrandMenu && "rotate-180")}
+            />
           </button>
 
           {showBrandMenu && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-[#182238] border border-[rgba(255,255,255,0.12)] rounded-lg shadow-xl py-1 z-50">
-              <div className="px-2.5 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                Brands
+            <>
+              {/* Invisible backdrop to close menu on outside click */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowBrandMenu(false)}
+              />
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#182238] border border-[rgba(255,255,255,0.12)] rounded-xl shadow-2xl py-1.5 z-50 animate-in fade-in zoom-in-95">
+                <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-white/5">
+                  <span>Switch Brand</span>
+                  <span className="text-[9px] text-slate-500 font-mono">Select Active</span>
+                </div>
+
+                <div className="max-h-56 overflow-y-auto py-1">
+                  {data.brands.map((b) => {
+                    const isCurrent = b.id === activeBrand?.id;
+                    return (
+                      <button
+                        key={b.id}
+                        onClick={() => {
+                          store.setActiveBrand(b.id);
+                          setShowBrandMenu(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer",
+                          isCurrent
+                            ? "bg-[#D4FF32]/10 text-white font-semibold"
+                            : "text-slate-300 hover:bg-[#1E2A44] hover:text-white"
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5 truncate min-w-0">
+                          <span
+                            className="w-2 h-2 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: b.primaryColor || "#D4FF32" }}
+                          />
+                          <span className="truncate">{b.name}</span>
+                        </div>
+                        {isCurrent && <Check className="w-3.5 h-3.5 text-[#D4FF32] flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Create New Brand Button */}
+                <div className="border-t border-[rgba(255,255,255,0.08)] mt-1 pt-1.5 px-2">
+                  <button
+                    onClick={() => {
+                      setShowBrandMenu(false);
+                      setIsCreateBrandOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-[#D4FF32]/10 hover:bg-[#D4FF32]/20 border border-[#D4FF32]/30 text-xs font-semibold text-[#D4FF32] transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Create New Brand</span>
+                  </button>
+                </div>
               </div>
-              {data.brands.map((b) => (
-                <button
-                  key={b.id}
-                  onClick={() => {
-                    store.setActiveBrand(b.id);
-                    setShowBrandMenu(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 text-xs text-slate-200 hover:bg-[#1E2A44] flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.primaryColor }} />
-                    <span className="truncate">{b.name}</span>
-                  </div>
-                  {b.id === activeBrand?.id && <Check className="w-3.5 h-3.5 text-[#D4FF32]" />}
-                </button>
-              ))}
-              <div className="border-t border-[rgba(255,255,255,0.08)] mt-1 pt-1 px-2">
-                <Link
-                  href="/app/brand-brain"
-                  onClick={() => setShowBrandMenu(false)}
-                  className="block text-[11px] text-[#C4B5FD] hover:underline py-1"
-                >
-                  + Add or edit in Brand Brain
-                </Link>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -269,6 +313,120 @@ export function Sidebar() {
           </button>
         </div>
       </div>
+
+      {/* Create New Brand Modal */}
+      {isCreateBrandOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
+          <div
+            className="w-full max-w-md bg-[#121A2B] border border-[rgba(255,255,255,0.12)] rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[rgba(255,255,255,0.08)]">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#D4FF32]" />
+                  Create New Brand
+                </h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Add a new client or internal brand under {activeWorkspace?.name}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCreateBrandOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] font-medium text-slate-300 block mb-1">
+                  Brand Name <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newBrandName}
+                  onChange={(e) => setNewBrandName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCreateBrand();
+                    }
+                  }}
+                  placeholder="e.g. Nike, Starbucks, Acme Corp..."
+                  className="w-full px-3 py-2 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.1)] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4FF32]"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-medium text-slate-300 block mb-1">
+                  Brand Email <span className="text-slate-500 font-normal">(for Brand Alerts & Reports)</span>
+                </label>
+                <input
+                  type="email"
+                  value={newBrandEmail}
+                  onChange={(e) => setNewBrandEmail(e.target.value)}
+                  placeholder="e.g. brand@example.com"
+                  className="w-full px-3 py-2 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.1)] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4FF32]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-medium text-slate-300 block mb-1">
+                  Tagline / Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newBrandTagline}
+                  onChange={(e) => setNewBrandTagline(e.target.value)}
+                  placeholder="e.g. Just Do It / Premium activewear"
+                  className="w-full px-3 py-2 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.1)] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#D4FF32]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-medium text-slate-300 block mb-1.5">
+                  Brand Accent Color
+                </label>
+                <div className="flex items-center gap-2">
+                  {["#D4FF32", "#38BDF8", "#EC4899", "#10B981", "#8B5CF6", "#F59E0B"].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewBrandColor(color)}
+                      className={cn(
+                        "w-6 h-6 rounded-full transition-transform cursor-pointer border border-white/20",
+                        newBrandColor === color && "scale-125 ring-2 ring-white ring-offset-2 ring-offset-[#121A2B]"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[rgba(255,255,255,0.08)] flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsCreateBrandOpen(false)}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateBrand}
+                disabled={!newBrandName.trim()}
+                className="px-4 py-1.5 rounded-lg bg-[#D4FF32] text-[#0B1020] hover:bg-[#c4ee24] disabled:opacity-40 text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                Create Brand
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

@@ -70,6 +70,7 @@ export interface Brand {
   workspaceId: string;
   name: string;
   slug: string;
+  brandEmail?: string;
   logoUrl?: string;
   websiteUrl?: string;
   primaryColor: string;

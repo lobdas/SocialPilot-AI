@@ -26,7 +26,7 @@ export default function FeaturesPage() {
       icon: Sparkles,
       tagline: "One brief. Native cross-network adaptations.",
       description:
-        "Generic cross-posting kills algorithm reach. SocialPilot adapts your single concept into native LinkedIn narratives with line spacing, punchy X hooks under 280 characters, Instagram carousel openers, Facebook community updates, Threads, and Pinterest pins.",
+        "Generic cross-posting kills algorithm reach. SocialPilot adapts your single concept into native LinkedIn narratives with line spacing, punchy X hooks under 280 characters, Instagram carousel openers, Facebook community updates, Google Business Profile (GMB) local posts, Threads, and Pinterest pins.",
       features: [
         "Channel-specific character enforcement",
         "Hashtag cluster generation & relevance scoring",

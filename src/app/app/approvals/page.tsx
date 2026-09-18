@@ -18,6 +18,11 @@ import { formatDate } from "@/lib/utils";
 export default function ApprovalsPage() {
   const { data } = useDemoStore();
   const [notification, setNotification] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -86,7 +91,7 @@ export default function ApprovalsPage() {
                 <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400 pt-1">
                   <span>Client: <strong className="text-white">{req.clientName}</strong></span>
                   <span>Platforms: <strong className="text-[#D4FF32]">{req.platforms.join(", ")}</strong></span>
-                  <span>Created: {formatDate(req.createdAt)}</span>
+                  <span suppressHydrationWarning>Created: {mounted ? formatDate(req.createdAt) : "Recently"}</span>
                 </div>
               </div>
 

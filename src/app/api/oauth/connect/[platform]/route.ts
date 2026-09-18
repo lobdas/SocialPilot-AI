@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MetaPublishingProvider } from "@/lib/providers/meta-provider";
-import { LinkedInPublishingProvider } from "@/lib/providers/linkedin-provider";
-import { ThreadsPublishingProvider } from "@/lib/providers/threads-provider";
+import { ProviderFactory } from "@/lib/providers/provider-factory";
 import { PlatformType } from "@/lib/types";
 
 export async function GET(
@@ -14,31 +12,13 @@ export async function GET(
   const redirectUri = `${origin}/api/oauth/callback/${rawPlatform.toLowerCase()}`;
   const state = `oauth_state_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-  if (platform === "FACEBOOK") {
-    const provider = new MetaPublishingProvider("FACEBOOK");
+  try {
+    const provider = ProviderFactory.getPublishingProvider(platform);
     const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
     return NextResponse.redirect(authUrl);
+  } catch (err: any) {
+    return NextResponse.redirect(
+      new URL(`/app/social-accounts?error=${encodeURIComponent(err.message || `Platform ${rawPlatform} not configured`)}`, req.url)
+    );
   }
-
-  if (platform === "INSTAGRAM") {
-    const provider = new MetaPublishingProvider("INSTAGRAM");
-    const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
-    return NextResponse.redirect(authUrl);
-  }
-
-  if (platform === "LINKEDIN") {
-    const provider = new LinkedInPublishingProvider();
-    const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
-    return NextResponse.redirect(authUrl);
-  }
-
-  if (platform === "THREADS") {
-    const provider = new ThreadsPublishingProvider();
-    const authUrl = provider.getAuthorizationUrl({ state, redirectUri });
-    return NextResponse.redirect(authUrl);
-  }
-
-  return NextResponse.redirect(
-    new URL(`/app/social-accounts?error=Platform+${rawPlatform}+not+configured`, req.url)
-  );
 }

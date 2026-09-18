@@ -19,6 +19,15 @@ interface IntegrationItem {
 const INTEGRATIONS: IntegrationItem[] = [
   // Available Tier 1
   {
+    id: "google-business",
+    name: "Google Business Profile (GMB)",
+    category: "AVAILABLE",
+    desc: "Publish local SEO updates, offers, events, and photos directly to Google Maps & Search. Ingest customer reviews and drive high-intent local storefront traffic.",
+    color: "#4285F4",
+    capabilities: ["Local Search Posts", "Offers & Events", "Maps Photo Upload", "Google Reviews", "Multi-Location Sync", "CTA Buttons"],
+    protocol: "Google My Business API v4 / OAuth 2.0",
+  },
+  {
     id: "linkedin",
     name: "LinkedIn",
     category: "AVAILABLE",
@@ -45,17 +54,6 @@ const INTEGRATIONS: IntegrationItem[] = [
     capabilities: ["Single Image (1:1 & 4:5)", "Carousels", "Reels (9:16)", "Direct Comments", "Audience Insights"],
     protocol: "Instagram Graph API v21.0",
   },
-
-  // In Development
-  {
-    id: "x-twitter",
-    name: "X (Twitter)",
-    category: "IN_DEVELOPMENT",
-    desc: "Single tweets, multi-tweet threads, and media attachments. Provider staged behind feature flags with demo simulation.",
-    color: "#FFFFFF",
-    capabilities: ["Tweets under 280 chars", "Thread Sequencing", "Media Attachments", "Quote Tweets"],
-    protocol: "X API v2 (OAuth 2.0 User Context)",
-  },
   {
     id: "threads",
     name: "Threads by Meta",
@@ -66,20 +64,41 @@ const INTEGRATIONS: IntegrationItem[] = [
     protocol: "Threads Publishing API v1.0",
   },
 
-  // Coming Soon
+  {
+    id: "x-twitter",
+    name: "X (Twitter)",
+    category: "AVAILABLE",
+    desc: "Single tweets, multi-tweet threads, and media attachments. Direct OAuth 2.0 publishing via official X API v2.",
+    color: "#FFFFFF",
+    capabilities: ["Tweets under 280 chars", "Thread Sequencing", "Media Attachments", "Quote Tweets"],
+    protocol: "X API v2 (OAuth 2.0)",
+  },
+  {
+    id: "youtube",
+    name: "YouTube & Shorts",
+    category: "AVAILABLE",
+    desc: "Scheduled YouTube Shorts and long-form video dispatch with automatic thumbnail upload and tag management.",
+    color: "#FF0000",
+    capabilities: ["YouTube Shorts (9:16)", "Video Uploads", "Custom Thumbnails", "Channel Analytics"],
+    protocol: "YouTube Data API v3 (OAuth 2.0)",
+  },
   {
     id: "pinterest",
     name: "Pinterest",
-    category: "COMING_SOON",
+    category: "AVAILABLE",
     desc: "Scheduled visual pin automation, board curation, and destination link mapping for e-commerce brands.",
     color: "#BD081C",
     capabilities: ["Standard Pins (2:3 aspect)", "Board Organization", "Rich Link Attributes"],
-    protocol: "Pinterest API v5 (Planned)",
+    protocol: "Pinterest API v5 (OAuth 2.0)",
   },
 ];
 
 export default function IntegrationsPage() {
   const [filter, setFilter] = useState<"ALL" | "AVAILABLE" | "IN_DEVELOPMENT" | "COMING_SOON">("ALL");
+
+  const availableCount = INTEGRATIONS.filter((i) => i.category === "AVAILABLE").length;
+  const inDevCount = INTEGRATIONS.filter((i) => i.category === "IN_DEVELOPMENT").length;
+  const comingSoonCount = INTEGRATIONS.filter((i) => i.category === "COMING_SOON").length;
 
   const filtered = INTEGRATIONS.filter((item) => {
     if (filter === "ALL") return true;
@@ -121,7 +140,7 @@ export default function IntegrationsPage() {
                   : "bg-[#121A2B] text-slate-300 hover:text-white"
               }`}
             >
-              Available Now (3)
+              Available Now ({availableCount})
             </button>
             <button
               onClick={() => setFilter("IN_DEVELOPMENT")}
@@ -131,7 +150,7 @@ export default function IntegrationsPage() {
                   : "bg-[#121A2B] text-slate-300 hover:text-white"
               }`}
             >
-              In Development (3)
+              In Development ({inDevCount})
             </button>
             <button
               onClick={() => setFilter("COMING_SOON")}
@@ -141,7 +160,7 @@ export default function IntegrationsPage() {
                   : "bg-[#121A2B] text-slate-300 hover:text-white"
               }`}
             >
-              Coming Soon (3)
+              Coming Soon ({comingSoonCount})
             </button>
           </div>
         </div>

@@ -55,7 +55,9 @@ export function MarketingFooter() {
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
               <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Security Disclosures</Link></li>
+              <li><Link href="/refund" className="hover:text-white transition-colors">Refund Policy</Link></li>
+              <li><Link href="/data-deletion" className="hover:text-white transition-colors">Data Deletion</Link></li>
+              <li><Link href="/cookies" className="hover:text-white transition-colors">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>

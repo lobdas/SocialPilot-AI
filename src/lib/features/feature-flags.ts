@@ -25,9 +25,9 @@ export const DEFAULT_PLATFORM_STATUS: Record<PlatformType, boolean> = {
   LINKEDIN: true,    // Production Ready Tier 1
   THREADS: true,     // Production Ready Tier 1 (Threads API by Meta)
   GOOGLE_BUSINESS: true, // Production Ready Tier 1 (Google Business Profile API)
-  X: false,          // Staged / Modular
-  PINTEREST: false,  // Staged
-  YOUTUBE: false,    // Staged
+  X: true,          // Production Ready Tier 1 (X API v2)
+  YOUTUBE: true,    // Production Ready Tier 1 (YouTube Data API v3)
+  PINTEREST: true,  // Production Ready Tier 1 (Pinterest API v5)
   TIKTOK: false,     // Staged
 };
 
@@ -60,10 +60,10 @@ export class FeatureFlagService {
       LINKEDIN: { enabled: true, tier: 1, statusText: "Production Ready" },
       THREADS: { enabled: true, tier: 1, statusText: "Production Ready" },
       GOOGLE_BUSINESS: { enabled: true, tier: 1, statusText: "Production Ready (Google Business)" },
-      X: { enabled: false, tier: 2, statusText: "Staged (Feature Flagged)" },
-      PINTEREST: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },
-      YOUTUBE: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },
-      TIKTOK: { enabled: false, tier: 2, statusText: "Staged (Coming Soon)" },
+      X: { enabled: true, tier: 1, statusText: "Production Ready (X API v2)" },
+      YOUTUBE: { enabled: true, tier: 1, statusText: "Production Ready (YouTube Data API v3)" },
+      PINTEREST: { enabled: true, tier: 1, statusText: "Production Ready (Pinterest API v5)" },
+      TIKTOK: { enabled: false, tier: 2, statusText: "Staged" },
     };
   }
 }

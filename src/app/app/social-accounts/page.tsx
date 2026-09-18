@@ -20,11 +20,12 @@ import { cn, formatDate } from "@/lib/utils";
 
 const PLATFORMS_CATALOG: { id: PlatformType; name: string; desc: string; iconColor: string }[] = [
   { id: "LINKEDIN", name: "LinkedIn", desc: "Company Pages & Personal Profiles", iconColor: "#0A66C2" },
-  { id: "X", name: "X (Twitter)", desc: "Direct Posts, Threads & Media", iconColor: "#FFFFFF" },
-  { id: "INSTAGRAM", name: "Instagram", desc: "Business & Creator Accounts (Feed & Stories)", iconColor: "#E4405F" },
   { id: "FACEBOOK", name: "Facebook", desc: "Pages & Business Groups", iconColor: "#1877F2" },
+  { id: "INSTAGRAM", name: "Instagram", desc: "Business & Creator Accounts (Feed & Stories)", iconColor: "#E4405F" },
   { id: "GOOGLE_BUSINESS", name: "Google Business Profile", desc: "Local Search, Maps & Store Updates (GMB)", iconColor: "#4285F4" },
   { id: "THREADS", name: "Threads", desc: "Conversational Threads by Meta", iconColor: "#FFFFFF" },
+  { id: "X", name: "X (Twitter)", desc: "Direct Posts, Threads & Media", iconColor: "#FFFFFF" },
+  { id: "YOUTUBE", name: "YouTube", desc: "YouTube Shorts & Video Publishing", iconColor: "#FF0000" },
   { id: "PINTEREST", name: "Pinterest", desc: "Pins & Board Automation", iconColor: "#BD081C" },
 ];
 
@@ -107,8 +108,17 @@ export default function SocialAccountsPage() {
   const handleConnect = (platform: PlatformType) => {
     setConnectingPlatform(platform);
 
-    // If live OAuth endpoint is available for Meta/LinkedIn/Threads
-    const livePlatforms: PlatformType[] = ["FACEBOOK", "INSTAGRAM", "LINKEDIN", "THREADS"];
+    // If live OAuth endpoint is available for any of our 8 channels
+    const livePlatforms: PlatformType[] = [
+      "FACEBOOK",
+      "INSTAGRAM",
+      "LINKEDIN",
+      "THREADS",
+      "GOOGLE_BUSINESS",
+      "X",
+      "YOUTUBE",
+      "PINTEREST",
+    ];
     const isLive = livePlatforms.includes(platform) && process.env.NEXT_PUBLIC_DEMO_MODE !== "true";
 
     if (isLive) {
