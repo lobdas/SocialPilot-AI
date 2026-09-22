@@ -14,9 +14,10 @@ import {
 } from "lucide-react";
 import { useDemoStore } from "@/lib/use-demo-store";
 import { formatDate } from "@/lib/utils";
+import { NoBrandState } from "@/components/brand/no-brand-state";
 
 export default function ApprovalsPage() {
-  const { data } = useDemoStore();
+  const { data, activeBrand } = useDemoStore();
   const [notification, setNotification] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -35,6 +36,21 @@ export default function ApprovalsPage() {
     showToast("📋 Client approval link copied to clipboard!");
   };
 
+  if (!activeBrand) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <NoBrandState featureName="Approvals" />
+      </div>
+    );
+  }
+
+  // Scope approvals to activeBrand
+  const brandApprovals = data.approvalRequests.filter((req) => {
+    if (req.brandId === activeBrand.id) return true;
+    const linkedPost = data.posts.find((p) => p.id === req.contentId);
+    return linkedPost ? linkedPost.brandId === activeBrand.id : false;
+  });
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
       {notification && (
@@ -48,21 +64,26 @@ export default function ApprovalsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(255,255,255,0.06)]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">Client & Team Approvals</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">Client & Team Approvals — {activeBrand.name}</h1>
             <span className="text-[10px] bg-amber-500/10 text-amber-400 font-semibold px-2 py-0.5 rounded-full border border-amber-500/20">
-              {data.approvalRequests.length} Pending
+              {brandApprovals.length} Pending
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Send passwordless, secure approval links to external clients and track stakeholder feedback.
+            Send passwordless, secure approval links specifically for <strong className="text-white">{activeBrand.name}</strong>.
           </p>
         </div>
       </div>
 
       {/* Approval Requests Table / Cards */}
       <div className="space-y-4">
-        {data.approvalRequests.map((req) => {
-          const linkedPost = data.posts.find((p) => p.id === req.contentId);
+        {brandApprovals.length === 0 ? (
+          <div className="p-8 text-center rounded-2xl bg-[#121A2B] border border-[rgba(255,255,255,0.08)] text-slate-400 text-xs">
+            No pending approval requests for {activeBrand.name}.
+          </div>
+        ) : (
+          brandApprovals.map((req) => {
+            const linkedPost = data.posts.find((p) => p.id === req.contentId);
           return (
             <div
               key={req.id}
@@ -116,7 +137,7 @@ export default function ApprovalsPage() {
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
     </div>
   );

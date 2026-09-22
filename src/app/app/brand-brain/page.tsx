@@ -12,15 +12,18 @@ import {
 } from "lucide-react";
 import { useDemoStore } from "@/lib/use-demo-store";
 import { Brand } from "@/lib/types";
+import { NoBrandState } from "@/components/brand/no-brand-state";
 
 export default function BrandBrainPage() {
   const { data, activeBrand, store } = useDemoStore();
-  const [form, setForm] = useState<Brand>(activeBrand);
+  const [form, setForm] = useState<Brand | null>(activeBrand);
   const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
-    setForm(activeBrand);
-  }, [activeBrand.id]);
+    if (activeBrand) {
+      setForm(activeBrand);
+    }
+  }, [activeBrand?.id]);
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -28,9 +31,18 @@ export default function BrandBrainPage() {
   };
 
   const handleSave = () => {
+    if (!form) return;
     store.updateBrand(form.id, form);
     showToast("🧠 Brand Brain guidelines saved! All future AI outputs and alerts will use these parameters.");
   };
+
+  if (!activeBrand || !form) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <NoBrandState featureName="Brand Brain" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">

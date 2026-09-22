@@ -40,7 +40,9 @@ export function AIAssistantDrawer() {
         replyText = "I recommend an editorial 3D minimal render with electric lime backlighting and clean typography for maximum scroll-stopping power on Instagram & LinkedIn.";
         actionObj = { label: "Generate in Media Studio", url: "/app/media" };
       } else {
-        replyText = `Great strategic initiative. I've analyzed your Brand Brain guidelines for "${activeBrand.name}". I recommend framing this with a high-curiosity hook on X and a comprehensive breakdown on LinkedIn.`;
+        replyText = activeBrand
+          ? `Great strategic initiative. I've analyzed your Brand Brain guidelines for "${activeBrand.name}". I recommend framing this with a high-curiosity hook on X and a comprehensive breakdown on LinkedIn.`
+          : `Great strategic initiative! Create your first brand to unlock tailored Brand Brain guidelines, automated copywriting, and multi-channel scheduling.`;
         actionObj = { label: "Draft in Studio", url: "/app/content-studio" };
       }
 
@@ -85,7 +87,7 @@ export function AIAssistantDrawer() {
                     LIVE
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400">Context: {activeBrand.name}</div>
+                <div className="text-[10px] text-slate-400">Context: {activeBrand?.name || "Global"}</div>
               </div>
             </div>
             <button

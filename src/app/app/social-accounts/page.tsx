@@ -17,6 +17,7 @@ import {
 import { useDemoStore } from "@/lib/use-demo-store";
 import { PlatformType, SocialAccount } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
+import { NoBrandState } from "@/components/brand/no-brand-state";
 
 const PLATFORMS_CATALOG: { id: PlatformType; name: string; desc: string; iconColor: string }[] = [
   { id: "LINKEDIN", name: "LinkedIn", desc: "Company Pages & Personal Profiles", iconColor: "#0A66C2" },
@@ -30,7 +31,7 @@ const PLATFORMS_CATALOG: { id: PlatformType; name: string; desc: string; iconCol
 ];
 
 export default function SocialAccountsPage() {
-  const { data, store, mounted } = useDemoStore();
+  const { data, store, activeBrand, mounted } = useDemoStore();
   const [connectingPlatform, setConnectingPlatform] = useState<PlatformType | null>(null);
   const [notification, setNotification] = useState<{ type: "success" | "error" | "info"; msg: string } | null>(null);
 
@@ -181,6 +182,18 @@ export default function SocialAccountsPage() {
     }
   };
 
+  if (!activeBrand) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <NoBrandState featureName="Social Accounts" />
+      </div>
+    );
+  }
+
+  const brandAccounts = data.socialAccounts.filter(
+    (a) => a.brandId === activeBrand.id
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Toast Notification */}
@@ -208,13 +221,13 @@ export default function SocialAccountsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(255,255,255,0.06)]">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">Social Accounts & Channels</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">Social Accounts — {activeBrand.name}</h1>
             <span className="text-[10px] bg-[#D4FF32]/10 text-[#D4FF32] font-semibold px-2 py-0.5 rounded-full border border-[#D4FF32]/20">
-              OAuth 2.0 Layer
+              {brandAccounts.length} Connected
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Connect and manage social channels. All channels start as &quot;Connect&quot; and switch to &quot;Manage&quot; upon successful authorization.
+            Connect and authenticate social channels specifically for <strong className="text-white">{activeBrand.name}</strong>.
           </p>
         </div>
 
@@ -225,7 +238,7 @@ export default function SocialAccountsPage() {
             title="Clean storage cache and reset channels"
           >
             <RefreshCw className="w-3 h-3" />
-            <span>Reset / Disconnect All</span>
+            <span>Reset Channels</span>
           </button>
         </div>
       </div>
@@ -234,26 +247,26 @@ export default function SocialAccountsPage() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
-            <span>Connected Channels</span>
+            <span>Connected Channels for {activeBrand.name}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#182238] text-slate-300 border border-[rgba(255,255,255,0.08)]">
-              {data.socialAccounts.length}
+              {brandAccounts.length}
             </span>
           </h2>
         </div>
 
-        {data.socialAccounts.length === 0 ? (
+        {brandAccounts.length === 0 ? (
           <div className="p-8 rounded-2xl bg-[#121A2B]/70 border border-dashed border-[rgba(255,255,255,0.1)] text-center space-y-2">
             <div className="w-10 h-10 rounded-xl bg-[#182238] border border-[rgba(255,255,255,0.08)] flex items-center justify-center mx-auto text-[#D4FF32]">
               <Share2 className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-semibold text-white">No Connected Channels</h3>
+            <h3 className="text-sm font-semibold text-white">No Connected Channels for {activeBrand.name}</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Select any channel from <strong className="text-slate-300">Available Social Platforms</strong> below and click <span className="text-[#D4FF32] font-semibold">Connect</span>. Once authorization succeeds, its button will switch to <span className="text-white font-semibold">Manage</span>.
+              Select any channel from <strong className="text-slate-300">Available Social Platforms</strong> below and click <span className="text-[#D4FF32] font-semibold">Connect</span> to link an account for this brand.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.socialAccounts.map((acc) => {
+            {brandAccounts.map((acc) => {
               const isActive = acc.status === "ACTIVE";
               return (
                 <div
@@ -447,7 +460,7 @@ export default function SocialAccountsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {PLATFORMS_CATALOG.map((p) => {
-            const isConnected = data.socialAccounts.some((acc) => acc.platform === p.id);
+            const isConnected = brandAccounts.some((acc) => acc.platform === p.id && acc.status === "ACTIVE");
             const isConnecting = connectingPlatform === p.id;
 
             return (

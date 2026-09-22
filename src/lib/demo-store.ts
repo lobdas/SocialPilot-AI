@@ -43,326 +43,14 @@ const INITIAL_DATA: DemoStoreData = {
     },
   ],
   activeWorkspaceId: "ws-1",
-  brands: [
-    {
-      id: "brand-1",
-      workspaceId: "ws-1",
-      name: "SocialPilot AI",
-      slug: "socialpilot",
-      brandEmail: "hello@socialpilot.ai",
-      tagline: "Create once. Publish everywhere. Manage everything.",
-      description: "All-in-one AI social media management platform for high-velocity teams.",
-      primaryColor: "#D4FF32",
-      secondaryColor: "#C4B5FD",
-      brandVoice: "Authoritative, bold, analytical, yet approachable and empowering",
-      tone: "Innovative, crisp, and high-agency",
-      preferredLanguage: "en",
-      targetAudience: "Digital marketing agencies, B2B founders, and multi-brand creators",
-      prohibitedClaims: "Never guarantee exact ROI percentages, never claim 100% automated virality without human review",
-      approvedExamples: "Stop wasting 15+ hours weekly reformatting captions. Scale your native reach with SocialPilot AI.",
-      faqs: [
-        { question: "What platforms do you support?", answer: "We support Meta (Facebook & Instagram), LinkedIn, X, Threads, and Pinterest." },
-        { question: "Does this include AI image generation?", answer: "Yes, built-in multi-aspect ratio generation and prompt engineering are included." }
-      ]
-    },
-    {
-      id: "brand-2",
-      workspaceId: "ws-1",
-      name: "Lumina Skincare",
-      slug: "lumina-skincare",
-      brandEmail: "care@luminaskincare.com",
-      tagline: "Science-backed radiant daily wellness",
-      description: "Clean dermatological skincare for sensitive skin.",
-      primaryColor: "#FDA4AF",
-      secondaryColor: "#E0E7FF",
-      brandVoice: "Gentle, scientific, empathetic, and calming",
-      tone: "Nurturing and educational",
-      preferredLanguage: "en",
-      targetAudience: "Wellness enthusiasts aged 24-42 seeking clean, dermatologically backed routines",
-      prohibitedClaims: "Never claim to cure medical conditions or promise overnight anti-aging results",
-    },
-    {
-      id: "brand-3",
-      workspaceId: "ws-1",
-      name: "Nordic Minimalist Studio",
-      slug: "nordic-studio",
-      brandEmail: "design@nordicstudio.com",
-      tagline: "Clean Scandinavian aesthetic for modern lifestyle brands",
-      description: "Design studio and e-commerce lifestyle products.",
-      primaryColor: "#38BDF8",
-      secondaryColor: "#E0E7FF",
-      brandVoice: "Minimalist, sleek, modern, and inspiring",
-      tone: "Sophisticated and crisp",
-      preferredLanguage: "en",
-      targetAudience: "Design lovers, tech creatives, and modern home enthusiasts",
-    },
-  ],
-  activeBrandId: "brand-1",
+  brands: [],
+  activeBrandId: "",
   socialAccounts: [],
-  posts: [
-    {
-      id: "post-1",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      title: "The Death of Generic Cross-Posting",
-      basePrompt: "Why modern brands need native multi-platform distribution instead of lazy copy-pasting",
-      contentType: "THOUGHT_LEADERSHIP",
-      status: "PUBLISHED",
-      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-      targetPlatforms: ["LINKEDIN", "X", "INSTAGRAM"],
-      mediaUrls: [
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080&auto=format&fit=crop&q=80",
-      ],
-      variants: {
-        LINKEDIN: {
-          platform: "LINKEDIN",
-          caption: "The biggest bottleneck in modern social growth isn't creativity. It's the friction between creation and multi-channel distribution.\n\nWhen we look at social algorithms in 2026, native syntax is non-negotiable. Drop your workflow below.",
-          hashtags: ["#MarketingStrategy", "#Leadership", "#ContentDistribution"],
-          characterCount: 220,
-        },
-        X: {
-          platform: "X",
-          caption: "Most marketing teams waste 15+ hours weekly reformatting captions.\n\nHere is what changes with native multi-channel adaptation: 4x higher dwell time & zero copy-paste fatigue.",
-          hashtags: ["#MarketingAI", "#GrowthStrategy"],
-          characterCount: 195,
-        },
-        INSTAGRAM: {
-          platform: "INSTAGRAM",
-          caption: "Stop copying & pasting your captions across platforms 🛑✨\n\nNative psychology matters. Swipe through to learn how to scale your brand reach effortlessly 👇",
-          hashtags: ["#SocialMediaTips", "#MarketingAgency", "#CreatorEconomy"],
-          characterCount: 180,
-        },
-      } as any,
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-      updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    },
-    {
-      id: "post-2",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      title: "AI Image Studio Launch Featurette",
-      basePrompt: "Introducing our instant multi-aspect ratio social media image generator",
-      contentType: "PRODUCT_LAUNCH",
-      status: "SCHEDULED",
-      scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 28).toISOString(), // Tomorrow afternoon
-      targetPlatforms: ["X", "INSTAGRAM", "FACEBOOK"],
-      mediaUrls: [
-        "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=1080&auto=format&fit=crop&q=80",
-      ],
-      variants: {
-        X: {
-          platform: "X",
-          caption: "Design social visuals in seconds with our new AI Image Studio.\n\nPreset for 1:1, 4:5, 9:16 and 16:9 in a single click. Available now in SocialPilot AI.",
-          hashtags: ["#AIStudio", "#ProductUpdate"],
-          characterCount: 165,
-        },
-        INSTAGRAM: {
-          platform: "INSTAGRAM",
-          caption: "Visual storytelling just got 10x faster 🎨⚡\n\nGenerate photorealistic, brand-aligned graphics preset for feeds, stories, and carousels without leaving your dashboard.",
-          hashtags: ["#CreativeTools", "#CanvaAlternative", "#DesignInspo"],
-          characterCount: 210,
-        },
-        FACEBOOK: {
-          platform: "FACEBOOK",
-          caption: "Exciting product update! Creating visual content for multiple platforms used to take a whole team of designers. Today we are launching AI Image Studio inside SocialPilot.",
-          hashtags: ["#TechLaunch", "#Productivity"],
-          characterCount: 190,
-        },
-      } as any,
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-      updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    },
-    {
-      id: "post-3",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      title: "Client Quarterly Growth Report Snapshot",
-      basePrompt: "Key metrics from Q3 showing 142% engagement lift across our enterprise clients",
-      contentType: "CASE_STUDY",
-      status: "PENDING_APPROVAL",
-      scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 72).toISOString(),
-      targetPlatforms: ["LINKEDIN"],
-      mediaUrls: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1080&auto=format&fit=crop&q=80",
-      ],
-      variants: {
-        LINKEDIN: {
-          platform: "LINKEDIN",
-          caption: "Real benchmark numbers: How 24 agency clients scaled their cross-platform pipeline by 142% in 90 days without adding headcount.\n\nThe framework is simple: centralize brand voice, decentralize native execution.",
-          hashtags: ["#B2BGrowth", "#CaseStudy", "#AgencyOps"],
-          characterCount: 230,
-        },
-      } as any,
-      approvalRequestId: "appr-1",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-      updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    },
-  ],
-  campaigns: [
-    {
-      id: "camp-1",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      name: "Q4 Product Launch Blitz",
-      objective: "CONVERSIONS",
-      description: "Omni-channel push across LinkedIn, X, and Instagram for enterprise tier rollout.",
-      status: "ACTIVE",
-      startDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 21).toISOString(),
-      budgetNotes: "$4,500 allocated for boost testing",
-      postCount: 14,
-      publishedCount: 6,
-    },
-    {
-      id: "camp-2",
-      workspaceId: "ws-1",
-      brandId: "brand-1",
-      name: "Thought Leadership & Industry Benchmark",
-      objective: "AWARENESS",
-      description: "Weekly executive insights on social media automation architecture.",
-      status: "ACTIVE",
-      startDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60).toISOString(),
-      budgetNotes: "Organic only",
-      postCount: 8,
-      publishedCount: 3,
-    },
-  ],
-  conversations: [
-    {
-      id: "conv-1",
-      workspaceId: "ws-1",
-      socialAccountId: "acc-1",
-      platform: "LINKEDIN",
-      type: "COMMENT",
-      customerName: "David Chen",
-      customerHandle: "david-chen-growth",
-      customerAvatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
-      snippet: "How does the brand brain handle prohibited regulatory claims?",
-      isUnread: true,
-      isArchived: false,
-      sentiment: "LEAD",
-      tags: ["High Intent", "Agency Prospect"],
-      lastActivityAt: new Date(Date.now() - 1000 * 60 * 22).toISOString(),
-      messages: [
-        {
-          id: "m-1",
-          senderType: "CUSTOMER",
-          senderName: "David Chen",
-          content: "We manage 12 FinTech and Healthcare accounts. How does the Brand Brain guarantee that AI generation never violates strict regulatory restrictions or makes forbidden claims?",
-          sentAt: new Date(Date.now() - 1000 * 60 * 22).toISOString(),
-        },
-      ],
-    },
-    {
-      id: "conv-2",
-      workspaceId: "ws-1",
-      socialAccountId: "acc-2",
-      platform: "X",
-      type: "DIRECT_MESSAGE",
-      customerName: "Elena Rostova",
-      customerHandle: "@elena_builds",
-      customerAvatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80",
-      snippet: "Does SocialPilot support client approval links without creating accounts?",
-      isUnread: false,
-      isArchived: false,
-      sentiment: "POSITIVE",
-      tags: ["Feature Inquiry"],
-      lastActivityAt: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
-      messages: [
-        {
-          id: "m-2",
-          senderType: "CUSTOMER",
-          senderName: "Elena Rostova",
-          content: "Hey team! Loving the demo. Can our external clients review and approve drafts without having to create a login?",
-          sentAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-        },
-        {
-          id: "m-3",
-          senderType: "AGENT",
-          senderName: "SocialPilot Team",
-          content: "Yes! Every draft can generate a secure tokenized client link (/client/approval/[token]) where clients can review multi-platform previews and approve with one click.",
-          sentAt: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
-        },
-      ],
-    },
-    {
-      id: "conv-3",
-      workspaceId: "ws-1",
-      socialAccountId: "acc-3",
-      platform: "INSTAGRAM",
-      type: "COMMENT",
-      customerName: "Marcus Sterling",
-      customerHandle: "@marcus_creative",
-      customerAvatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
-      snippet: "This interface is stunning. What is the pricing for agencies?",
-      isUnread: true,
-      isArchived: false,
-      sentiment: "LEAD",
-      tags: ["Pricing", "Agency"],
-      lastActivityAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-      messages: [
-        {
-          id: "m-4",
-          senderType: "CUSTOMER",
-          senderName: "Marcus Sterling",
-          content: "This interface looks unbelievable. What does your agency plan include in terms of workspaces and brand seats?",
-          sentAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        },
-      ],
-    },
-  ],
-  approvalRequests: [
-    {
-      id: "appr-1",
-      contentId: "post-3",
-      clientToken: "demo-client-token-apex-992",
-      state: "PENDING",
-      clientName: "Horizon Ventures (Client)",
-      clientEmail: "reviews@horizonventures.com",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-      contentTitle: "Client Quarterly Growth Report Snapshot",
-      platforms: ["LINKEDIN"],
-      comments: [
-        {
-          id: "comm-1",
-          authorName: "Content Lead (Internal)",
-          isExternalClient: false,
-          message: "Ready for client sign-off before Friday scheduling.",
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-        },
-      ],
-    },
-  ],
-  mediaAssets: [
-    {
-      id: "med-1",
-      title: "Abstract Neon Workspace 3D",
-      url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080&auto=format&fit=crop&q=80",
-      type: "IMAGE",
-      aspectRatio: "1:1",
-      tags: ["AI Creative", "Hero", "Brand"],
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    },
-    {
-      id: "med-2",
-      title: "SocialPilot Dashboard Preview Dark",
-      url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1080&auto=format&fit=crop&q=80",
-      type: "IMAGE",
-      aspectRatio: "16:9",
-      tags: ["Product", "UI Mockup"],
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    },
-    {
-      id: "med-3",
-      title: "Electric Lime Gradient Sphere",
-      url: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=1080&auto=format&fit=crop&q=80",
-      type: "IMAGE",
-      aspectRatio: "4:5",
-      tags: ["Visual", "Instagram Preset"],
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    },
-  ],
+  posts: [],
+  campaigns: [],
+  conversations: [],
+  approvalRequests: [],
+  mediaAssets: [],
 };
 
 export const INITIAL_DEMO_DATA: DemoStoreData = INITIAL_DATA;
@@ -389,22 +77,23 @@ class DemoStore {
         localStorage.removeItem("socialpilot_demo_store_v2");
         localStorage.removeItem("socialpilot_demo_store_v3");
         localStorage.removeItem("socialpilot_demo_store_v4");
+        localStorage.removeItem("socialpilot_demo_store_v5");
+        localStorage.removeItem("socialpilot_demo_store_v6");
 
-        const saved = localStorage.getItem("socialpilot_demo_store_v5");
+        const saved = localStorage.getItem("socialpilot_fresh_brand_v1");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && Array.isArray(parsed.brands) && Array.isArray(parsed.posts)) {
-            // Ensure single workspace per account
             if (parsed.workspaces && parsed.workspaces.length > 1) {
               parsed.workspaces = [parsed.workspaces[0]];
               parsed.activeWorkspaceId = parsed.workspaces[0].id;
             }
             this.data = parsed;
+            this.persist();
             this.notify();
             return;
           }
         } else {
-          // Initialize fresh v5 store
           this.persist();
         }
       } catch (e) {
@@ -416,14 +105,13 @@ class DemoStore {
   private persist() {
     if (typeof window !== "undefined") {
       try {
-        // Strip massive base64 image strings from localStorage to prevent QuotaExceededError (5MB browser limit)
         const serialized = JSON.stringify(this.data, (key, value) => {
           if (typeof value === "string" && value.startsWith("data:image/") && value.length > 10000) {
             return value.slice(0, 100) + "...[IMAGE_ATTACHED]";
           }
           return value;
         });
-        localStorage.setItem("socialpilot_demo_store_v5", serialized);
+        localStorage.setItem("socialpilot_fresh_brand_v1", serialized);
       } catch (e) {
         console.warn("Storage quota exceeded; retained cleanly in active memory:", e);
       }
@@ -450,8 +138,8 @@ class DemoStore {
     return this.data.workspaces.find((w) => w.id === this.data.activeWorkspaceId) || this.data.workspaces[0];
   }
 
-  getActiveBrand(): Brand {
-    return this.data.brands.find((b) => b.id === this.data.activeBrandId) || this.data.brands[0];
+  getActiveBrand(): Brand | null {
+    return this.data.brands.find((b) => b.id === this.data.activeBrandId) || this.data.brands[0] || null;
   }
 
   setActiveWorkspace(id: string) {
@@ -467,6 +155,7 @@ class DemoStore {
   addPost(post: Omit<ContentItem, "id" | "createdAt" | "updatedAt">): ContentItem {
     const newPost: ContentItem = {
       ...post,
+      brandId: post.brandId || this.data.activeBrandId,
       id: `post-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -488,6 +177,49 @@ class DemoStore {
     this.persist();
   }
 
+  addCampaign(campaign: Omit<Campaign, "id" | "postCount" | "publishedCount"> & Partial<Campaign>): Campaign {
+    const newCamp: Campaign = {
+      id: campaign.id || `camp-${Date.now()}`,
+      workspaceId: campaign.workspaceId || this.data.activeWorkspaceId,
+      brandId: campaign.brandId || this.data.activeBrandId,
+      name: campaign.name,
+      objective: campaign.objective || "CONVERSIONS",
+      description: campaign.description || "",
+      status: campaign.status || "ACTIVE",
+      startDate: campaign.startDate || new Date().toISOString(),
+      endDate: campaign.endDate || new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+      budgetNotes: campaign.budgetNotes || "",
+      postCount: campaign.postCount || 0,
+      publishedCount: campaign.publishedCount || 0,
+    };
+    this.data.campaigns = [newCamp, ...this.data.campaigns];
+    this.persist();
+    return newCamp;
+  }
+
+  updateCampaign(id: string, updates: Partial<Campaign>) {
+    this.data.campaigns = this.data.campaigns.map((c) =>
+      c.id === id ? { ...c, ...updates } : c
+    );
+    this.persist();
+  }
+
+  deleteCampaign(id: string) {
+    this.data.campaigns = this.data.campaigns.filter((c) => c.id !== id);
+    // Disassociate posts linked to this campaign
+    this.data.posts = this.data.posts.map((p) =>
+      p.campaignId === id ? { ...p, campaignId: undefined } : p
+    );
+    this.persist();
+  }
+
+  assignPostToCampaign(postId: string, campaignId: string | null) {
+    this.data.posts = this.data.posts.map((p) =>
+      p.id === postId ? { ...p, campaignId: campaignId || undefined, updatedAt: new Date().toISOString() } : p
+    );
+    this.persist();
+  }
+
   updateWorkspace(id: string, updates: Partial<Workspace>) {
     this.data.workspaces = this.data.workspaces.map((w) => (w.id === id ? { ...w, ...updates } : w));
     this.persist();
@@ -499,12 +231,57 @@ class DemoStore {
   }
 
   addBrand(brand: Omit<Brand, "id">) {
+    const newBrandId = `brand-${Date.now()}`;
     const newBrand: Brand = {
       ...brand,
-      id: `brand-${Date.now()}`,
+      id: newBrandId,
+      brandVoice: brand.brandVoice || "Authentic, clear, and engaging",
+      tone: brand.tone || "Professional yet conversational",
+      preferredLanguage: brand.preferredLanguage || "en",
+      targetAudience: brand.targetAudience || `Followers and customers of ${brand.name}`,
     };
     this.data.brands.push(newBrand);
     this.data.activeBrandId = newBrand.id;
+
+    // Initialize starter welcome draft post for this brand so it's fully ready to publish
+    const starterPost: ContentItem = {
+      id: `post-${Date.now()}`,
+      workspaceId: this.data.activeWorkspaceId,
+      brandId: newBrand.id,
+      title: `Welcome to ${newBrand.name}`,
+      basePrompt: `Introducing ${newBrand.name}: ${newBrand.tagline || "Innovating for our community"}`,
+      contentType: "ANNOUNCEMENT",
+      status: "DRAFT",
+      targetPlatforms: ["LINKEDIN", "X", "INSTAGRAM"],
+      mediaUrls: [
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080&auto=format&fit=crop&q=80",
+      ],
+      variants: {
+        LINKEDIN: {
+          platform: "LINKEDIN",
+          caption: `We are excited to introduce ${newBrand.name}! 🚀\n\n${newBrand.description || newBrand.tagline || "Follow along for our latest updates and insights."}\n\nWhat are you most excited to see from us?`,
+          hashtags: ["#BrandLaunch", "#Innovation", `#${newBrand.name.replace(/\s+/g, "")}`],
+          characterCount: 175,
+        },
+        X: {
+          platform: "X",
+          caption: `Excited to launch the official account for ${newBrand.name}! 🎉 Follow us for product news, updates, and more. ${newBrand.tagline || ""}`,
+          hashtags: ["#Launch", `#${newBrand.name.replace(/\s+/g, "")}`],
+          characterCount: 140,
+        },
+        INSTAGRAM: {
+          platform: "INSTAGRAM",
+          caption: `Welcome to ${newBrand.name} ✨\n\n${newBrand.tagline || "Creating memorable experiences."}\n\nStay tuned for behind-the-scenes content and exclusive reveals! 👇`,
+          hashtags: ["#NewBrand", "#Community", `#${newBrand.name.replace(/\s+/g, "")}`],
+          characterCount: 160,
+        },
+      } as any,
+      commentsCount: 0,
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.data.posts.push(starterPost);
     this.persist();
     return newBrand;
   }
@@ -572,8 +349,11 @@ class DemoStore {
   }
 
   addInboxMessage(conversationId: string, content: string, senderType: "AGENT" | "CUSTOMER" = "AGENT") {
+    let linkedPostId: string | undefined;
+
     this.data.conversations = this.data.conversations.map((conv) => {
       if (conv.id === conversationId) {
+        linkedPostId = conv.postId;
         const newMsg = {
           id: `m-${Date.now()}`,
           senderType,
@@ -591,6 +371,152 @@ class DemoStore {
       }
       return conv;
     });
+
+    // Also update the linked post's comment thread if replied by AGENT
+    if (linkedPostId && senderType === "AGENT") {
+      this.data.posts = this.data.posts.map((post) => {
+        if (post.id === linkedPostId) {
+          const currentComments = post.comments || [];
+          const existingComm = currentComments.find(
+            (c) => c.id === conversationId || c.id === `comm_${conversationId}`
+          );
+
+          if (existingComm) {
+            const updatedReplies = [
+              ...(existingComm.replies || []),
+              {
+                id: `rep-${Date.now()}`,
+                authorName: "Apex Growth Team",
+                content,
+                sentAt: new Date().toISOString(),
+              },
+            ];
+            return {
+              ...post,
+              comments: currentComments.map((c) =>
+                c.id === existingComm.id ? { ...c, replies: updatedReplies } : c
+              ),
+              updatedAt: new Date().toISOString(),
+            };
+          } else {
+            // Append as reply to the latest comment on this post
+            if (currentComments.length > 0) {
+              const lastIdx = currentComments.length - 1;
+              const lastComm = currentComments[lastIdx];
+              const updatedReplies = [
+                ...(lastComm.replies || []),
+                {
+                  id: `rep-${Date.now()}`,
+                  authorName: "Apex Growth Team",
+                  content,
+                  sentAt: new Date().toISOString(),
+                },
+              ];
+              const updatedComments = [...currentComments];
+              updatedComments[lastIdx] = { ...lastComm, replies: updatedReplies };
+              return { ...post, comments: updatedComments, updatedAt: new Date().toISOString() };
+            }
+          }
+        }
+        return post;
+      });
+    }
+
+    this.persist();
+  }
+
+  addPostComment(
+    postId: string,
+    platform: PlatformType,
+    authorName: string,
+    content: string,
+    avatarUrl?: string
+  ) {
+    const post = this.data.posts.find((p) => p.id === postId);
+    const postTitle = post ? post.title : "Social Post";
+    const commentId = `comm_${Date.now()}`;
+    const newSentAt = new Date().toISOString();
+
+    const newComment = {
+      id: commentId,
+      platform,
+      authorName,
+      authorAvatar: avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=182238&color=D4FF32`,
+      content,
+      sentAt: newSentAt,
+      replies: [],
+    };
+
+    // 1. Update post comments array
+    this.data.posts = this.data.posts.map((p) => {
+      if (p.id === postId) {
+        const existingComments = p.comments || [];
+        return {
+          ...p,
+          commentsCount: (p.commentsCount || existingComments.length) + 1,
+          comments: [newComment, ...existingComments],
+          updatedAt: newSentAt,
+        };
+      }
+      return p;
+    });
+
+    // 2. Add or prepend to Unified Social Inbox conversations
+    const convId = `conv_${Date.now()}`;
+    const newConv: InboxConversation = {
+      id: convId,
+      workspaceId: this.data.activeWorkspaceId,
+      brandId: post?.brandId || this.data.activeBrandId,
+      socialAccountId: `acc_${platform.toLowerCase()}`,
+      platform,
+      type: "COMMENT",
+      customerName: authorName,
+      customerHandle: `@${authorName.toLowerCase().replace(/[^a-z0-9_]/g, "_")}`,
+      customerAvatarUrl: newComment.authorAvatar,
+      snippet: content,
+      isUnread: true,
+      isArchived: false,
+      sentiment: "LEAD",
+      tags: [platform, "Post Comment", "Live Feed"],
+      lastActivityAt: newSentAt,
+      postId,
+      postTitle,
+      messages: [
+        {
+          id: `m_${Date.now()}`,
+          senderType: "CUSTOMER",
+          senderName: authorName,
+          content,
+          sentAt: newSentAt,
+        },
+      ],
+    };
+
+    this.data.conversations = [newConv, ...this.data.conversations];
+    this.persist();
+    return { post, conversation: newConv };
+  }
+
+  toggleArchiveConversation(conversationId: string) {
+    this.data.conversations = this.data.conversations.map((c) =>
+      c.id === conversationId ? { ...c, isArchived: !c.isArchived } : c
+    );
+    this.persist();
+  }
+
+  toggleStarLead(conversationId: string) {
+    this.data.conversations = this.data.conversations.map((c) =>
+      c.id === conversationId
+        ? { ...c, sentiment: c.sentiment === "LEAD" ? "NEUTRAL" : "LEAD" }
+        : c
+    );
+    this.persist();
+  }
+
+  markConversationAsRead(conversationId: string) {
+    this.data.conversations = this.data.conversations.map((c) =>
+      c.id === conversationId ? { ...c, isUnread: false } : c
+    );
     this.persist();
   }
 
@@ -634,10 +560,12 @@ class DemoStore {
     accessToken?: string,
     platformAccountId?: string
   ) {
-    const existing = this.data.socialAccounts.find((a) => a.platform === platform);
+    const existing = this.data.socialAccounts.find(
+      (a) => a.platform === platform && a.brandId === this.data.activeBrandId
+    );
     if (existing) {
       this.data.socialAccounts = this.data.socialAccounts.map((a) =>
-        a.platform === platform
+        a.id === existing.id
           ? {
               ...a,
               accountName: accountName || a.accountName,

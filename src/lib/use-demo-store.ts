@@ -22,8 +22,8 @@ export function useDemoStore() {
   // to guarantee identical virtual DOM trees and eliminate hydration mismatches.
   const data = mounted ? rawData : demoStore.getInitialData();
 
-  const activeBrand: Brand =
-    data.brands.find((b) => b.id === data.activeBrandId) || data.brands[0];
+  const activeBrand: Brand | null =
+    data.brands.find((b) => b.id === data.activeBrandId) || data.brands[0] || null;
   const activeWorkspace: Workspace =
     data.workspaces.find((w) => w.id === data.activeWorkspaceId) || data.workspaces[0];
 

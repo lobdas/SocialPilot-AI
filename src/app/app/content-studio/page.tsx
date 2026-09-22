@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import {
   Sparkles,
   RefreshCw,
@@ -48,6 +49,7 @@ import { AIService } from "@/lib/ai/ai-service";
 import { ProviderFactory } from "@/lib/providers/provider-factory";
 import { ContentVariant, PlatformType } from "@/lib/types";
 import { cn, generateToken, formatDate } from "@/lib/utils";
+import { NoBrandState } from "@/components/brand/no-brand-state";
 
 const PLATFORMS: { id: PlatformType; name: string; color: string; limit: number }[] = [
   { id: "LINKEDIN", name: "LinkedIn", color: "#0A66C2", limit: 3000 },
@@ -340,6 +342,61 @@ export default function ContentStudioPage() {
 
   // Active editing tab
   const [activeTab, setActiveTab] = useState<PlatformType>("INSTAGRAM");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [scheduledForCalendarDate, setScheduledForCalendarDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const campId = params.get("campaignId");
+      if (campId) {
+        setSelectedCampaignId(campId);
+      }
+
+      const dateParam = params.get("date");
+      if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+        setScheduleDate(dateParam);
+        setScheduledForCalendarDate(dateParam);
+        const timeParam = params.get("time");
+        if (timeParam) setScheduleTime(timeParam);
+      }
+
+      const editId = params.get("edit") || params.get("id") || params.get("postId");
+      if (editId) {
+        const post = demoStore.getData().posts.find((p) => p.id === editId);
+        if (post) {
+          setEditingPostId(post.id);
+          if (post.title) setTopic(post.title);
+          if (post.contentType) setContentType(post.contentType);
+          if (post.campaignId) setSelectedCampaignId(post.campaignId);
+          if (post.targetPlatforms && post.targetPlatforms.length > 0) {
+            setSelectedPlatforms(post.targetPlatforms);
+            setActiveTab(post.targetPlatforms[0]);
+          }
+          if (post.variants && Object.keys(post.variants).length > 0) {
+            setVariants((prev) => ({
+              ...prev,
+              ...post.variants,
+            }));
+          }
+          if (post.mediaUrls && post.mediaUrls[0]) {
+            setSelectedMedia(post.mediaUrls[0]);
+            setMediaType("image");
+          }
+          if (post.scheduledAt) {
+            const d = new Date(post.scheduledAt);
+            if (!isNaN(d.getTime())) {
+              setScheduleDate(d.toISOString().split("T")[0]);
+              setScheduleTime(
+                `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+              );
+            }
+          }
+        }
+      }
+    }
+  }, []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
@@ -715,6 +772,7 @@ export default function ContentStudioPage() {
             [activeTab]: variants[activeTab],
           } as any,
           mediaUrls: selectedMedia ? [selectedMedia] : [],
+          campaignId: selectedCampaignId || undefined,
         });
 
         if (res.live) {
@@ -796,6 +854,7 @@ export default function ContentStudioPage() {
         targetPlatforms: populatedPlatforms,
         variants,
         mediaUrls: selectedMedia ? [selectedMedia] : [],
+        campaignId: selectedCampaignId || undefined,
       });
 
       const populatedNames = populatedPlatforms
@@ -834,6 +893,25 @@ export default function ContentStudioPage() {
     }
   };
 
+  const handleSavePostEdits = () => {
+    if (!editingPostId) return;
+    const currentPost = demoStore.getData().posts.find((p) => p.id === editingPostId);
+    const scheduledDateTime = scheduleDate && scheduleTime ? new Date(`${scheduleDate}T${scheduleTime}`).toISOString() : currentPost?.scheduledAt;
+
+    demoStore.updatePost(editingPostId, {
+      title: topic ? (topic.slice(0, 50) + (topic.length > 50 ? "..." : "")) : (currentPost?.title || "Social Post"),
+      basePrompt: topic,
+      contentType,
+      targetPlatforms: selectedPlatforms,
+      variants,
+      mediaUrls: selectedMedia ? [selectedMedia] : (currentPost?.mediaUrls || []),
+      campaignId: selectedCampaignId || undefined,
+      scheduledAt: scheduledDateTime,
+      updatedAt: new Date().toISOString(),
+    });
+    showToast("🎉 Post changes saved successfully to Content Calendar & Posts list!", "success");
+  };
+
   const handleConfirmSchedule = () => {
     if (!scheduleDate || !scheduleTime) {
       showToast("Please select both a date and time to schedule.", "error");
@@ -842,6 +920,27 @@ export default function ContentStudioPage() {
     const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
     if (isNaN(scheduledDateTime.getTime())) {
       showToast("Invalid date or time selected.", "error");
+      return;
+    }
+
+    if (editingPostId) {
+      demoStore.updatePost(editingPostId, {
+        title: topic ? (topic.slice(0, 50) + (topic.length > 50 ? "..." : "")) : "Scheduled Social Post",
+        basePrompt: topic,
+        contentType,
+        status: "SCHEDULED",
+        scheduledAt: scheduledDateTime.toISOString(),
+        targetPlatforms: selectedPlatforms,
+        variants,
+        mediaUrls: selectedMedia ? [selectedMedia] : [],
+        campaignId: selectedCampaignId || undefined,
+        updatedAt: new Date().toISOString(),
+      });
+      setIsScheduleModalOpen(false);
+      showToast(
+        `📅 Post rescheduled for ${formatDate(scheduledDateTime.toISOString(), "medium")}!`,
+        "success"
+      );
       return;
     }
 
@@ -856,6 +955,7 @@ export default function ContentStudioPage() {
       targetPlatforms: selectedPlatforms,
       variants,
       mediaUrls: selectedMedia ? [selectedMedia] : [],
+      campaignId: selectedCampaignId || undefined,
     });
 
     setIsScheduleModalOpen(false);
@@ -896,6 +996,7 @@ export default function ContentStudioPage() {
       targetPlatforms: selectedPlatforms,
       variants,
       mediaUrls: selectedMedia ? [selectedMedia] : [],
+      campaignId: selectedCampaignId || undefined,
     });
 
     demoStore.addApprovalRequest({
@@ -919,6 +1020,14 @@ export default function ContentStudioPage() {
 
     showToast(`📋 Added to Approvals page! Client link: /client/approval/${token}`, "success");
   };
+
+  if (!activeBrand) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <NoBrandState featureName="AI Content Studio" />
+      </div>
+    );
+  }
 
   const cleanHandle = getCleanHandle(connectedChannel, activeBrand);
   const cleanDisplayName = getCleanDisplayName(connectedChannel, activeBrand);
@@ -1056,8 +1165,63 @@ export default function ContentStudioPage() {
               </>
             )}
           </button>
+          {/* 5. Save Changes (When editing existing post) */}
+          {editingPostId && (
+            <button
+              onClick={handleSavePostEdits}
+              className="px-3.5 py-1.5 rounded-lg bg-[#D4FF32] text-[#0B1020] font-bold text-xs shadow-[0_0_15px_rgba(212,255,50,0.3)] hover:bg-[#C2ED25] transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Save all changes to the existing post"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Save Changes</span>
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Editing Mode or Scheduled Date Banner */}
+      {editingPostId && (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <span className="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[11px] uppercase tracking-wider border border-amber-500/30">
+              Editing Post from Calendar / Posts
+            </span>
+            <span className="text-white font-semibold text-xs truncate max-w-md">
+              {topic || "Untitled Post"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSavePostEdits}
+              className="px-3 py-1.5 rounded-lg bg-[#D4FF32] text-[#0B1020] text-xs font-bold hover:bg-[#C2ED25] transition-all flex items-center gap-1.5 shadow-[0_0_12px_rgba(212,255,50,0.25)] cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Save Changes</span>
+            </button>
+            <Link
+              href="/app/calendar"
+              className="px-3 py-1.5 rounded-lg bg-[#0B1020] hover:bg-[#182238] text-slate-300 hover:text-white border border-[rgba(255,255,255,0.1)] text-xs font-medium transition-colors"
+            >
+              Back to Calendar
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {scheduledForCalendarDate && !editingPostId && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[#D4FF32]/10 border border-[#D4FF32]/30 text-xs text-[#D4FF32] animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Scheduling post for selected calendar date: <strong className="text-white underline">{scheduledForCalendarDate}</strong></span>
+          </div>
+          <Link
+            href="/app/calendar"
+            className="text-slate-400 hover:text-white underline text-[11px]"
+          >
+            Back to Calendar
+          </Link>
+        </div>
+      )}
 
       {/* 3-Column Studio Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1098,6 +1262,28 @@ export default function ContentStudioPage() {
                 {CONTENT_TYPES.map((type) => (
                   <option key={type} value={type} className="bg-[#0B1020]">
                     {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Associated Campaign */}
+            <div>
+              <label className="text-[11px] font-medium text-slate-300 block mb-1 flex items-center justify-between">
+                <span>Associated Campaign</span>
+                {selectedCampaignId && (
+                  <span className="text-[10px] text-[#D4FF32] font-semibold">Active Linked</span>
+                )}
+              </label>
+              <select
+                value={selectedCampaignId}
+                onChange={(e) => setSelectedCampaignId(e.target.value)}
+                className="w-full p-2 rounded-lg bg-[#0B1020] border border-[rgba(255,255,255,0.08)] text-xs text-white focus:outline-none focus:border-[#D4FF32]/60"
+              >
+                <option value="" className="bg-[#0B1020]">None (Standalone Post)</option>
+                {data.campaigns.map((camp) => (
+                  <option key={camp.id} value={camp.id} className="bg-[#0B1020]">
+                    {camp.name} ({camp.objective})
                   </option>
                 ))}
               </select>

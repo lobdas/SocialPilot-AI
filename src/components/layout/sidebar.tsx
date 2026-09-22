@@ -55,6 +55,12 @@ export function Sidebar() {
   const [newBrandTagline, setNewBrandTagline] = useState("");
   const [newBrandColor, setNewBrandColor] = useState("#D4FF32");
 
+  useEffect(() => {
+    const handleOpen = () => setIsCreateBrandOpen(true);
+    window.addEventListener("open-create-brand", handleOpen);
+    return () => window.removeEventListener("open-create-brand", handleOpen);
+  }, []);
+
   const handleCreateBrand = () => {
     if (!newBrandName.trim()) return;
     store.addBrand({
@@ -129,21 +135,40 @@ export function Sidebar() {
             <span className="text-[9px] font-mono text-slate-500">{data.brands.length} Brands</span>
           </div>
           <button
-            onClick={() => setShowBrandMenu(!showBrandMenu)}
+            onClick={() => {
+              if (data.brands.length === 0) {
+                setIsCreateBrandOpen(true);
+              } else {
+                setShowBrandMenu(!showBrandMenu);
+              }
+            }}
             className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg bg-[#182238] hover:bg-[#1E2A44] border border-[rgba(255,255,255,0.08)] hover:border-[#D4FF32]/40 text-xs text-slate-200 transition-all shadow-sm group cursor-pointer"
           >
             <div className="flex items-center gap-2 truncate min-w-0">
-              <span
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-2 ring-white/10"
-                style={{ backgroundColor: activeBrand?.primaryColor || "#D4FF32" }}
-              />
-              <span className="font-semibold truncate text-white group-hover:text-[#D4FF32] transition-colors">
-                {activeBrand?.name || "Select Brand"}
-              </span>
+              {data.brands.length === 0 ? (
+                <>
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#D4FF32] animate-pulse" />
+                  <span className="font-bold truncate text-[#D4FF32]">
+                    + Create First Brand
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-2 ring-white/10"
+                    style={{ backgroundColor: activeBrand?.primaryColor || "#D4FF32" }}
+                  />
+                  <span className="font-semibold truncate text-white group-hover:text-[#D4FF32] transition-colors">
+                    {activeBrand?.name || "Select Brand"}
+                  </span>
+                </>
+              )}
             </div>
-            <ChevronDown
-              className={cn("w-3.5 h-3.5 text-slate-400 transition-transform", showBrandMenu && "rotate-180")}
-            />
+            {data.brands.length > 0 && (
+              <ChevronDown
+                className={cn("w-3.5 h-3.5 text-slate-400 transition-transform", showBrandMenu && "rotate-180")}
+              />
+            )}
           </button>
 
           {showBrandMenu && (
@@ -160,33 +185,39 @@ export function Sidebar() {
                 </div>
 
                 <div className="max-h-56 overflow-y-auto py-1">
-                  {data.brands.map((b) => {
-                    const isCurrent = b.id === activeBrand?.id;
-                    return (
-                      <button
-                        key={b.id}
-                        onClick={() => {
-                          store.setActiveBrand(b.id);
-                          setShowBrandMenu(false);
-                        }}
-                        className={cn(
-                          "w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer",
-                          isCurrent
-                            ? "bg-[#D4FF32]/10 text-white font-semibold"
-                            : "text-slate-300 hover:bg-[#1E2A44] hover:text-white"
-                        )}
-                      >
-                        <div className="flex items-center gap-2.5 truncate min-w-0">
-                          <span
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: b.primaryColor || "#D4FF32" }}
-                          />
-                          <span className="truncate">{b.name}</span>
-                        </div>
-                        {isCurrent && <Check className="w-3.5 h-3.5 text-[#D4FF32] flex-shrink-0" />}
-                      </button>
-                    );
-                  })}
+                  {data.brands.length === 0 ? (
+                    <div className="px-3 py-4 text-center text-xs text-slate-400">
+                      No brands created yet.
+                    </div>
+                  ) : (
+                    data.brands.map((b) => {
+                      const isCurrent = b.id === activeBrand?.id;
+                      return (
+                        <button
+                          key={b.id}
+                          onClick={() => {
+                            store.setActiveBrand(b.id);
+                            setShowBrandMenu(false);
+                          }}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer",
+                            isCurrent
+                              ? "bg-[#D4FF32]/10 text-white font-semibold"
+                              : "text-slate-300 hover:bg-[#1E2A44] hover:text-white"
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5 truncate min-w-0">
+                            <span
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: b.primaryColor || "#D4FF32" }}
+                            />
+                            <span className="truncate">{b.name}</span>
+                          </div>
+                          {isCurrent && <Check className="w-3.5 h-3.5 text-[#D4FF32] flex-shrink-0" />}
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
 
                 {/* Create New Brand Button */}
@@ -199,7 +230,7 @@ export function Sidebar() {
                     className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-[#D4FF32]/10 hover:bg-[#D4FF32]/20 border border-[#D4FF32]/30 text-xs font-semibold text-[#D4FF32] transition-colors cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>+ Create New Brand</span>
+                    <span>Create New Brand</span>
                   </button>
                 </div>
               </div>

@@ -95,6 +95,23 @@ export interface ContentVariant {
   characterCount: number;
 }
 
+export interface PostCommentReply {
+  id: string;
+  authorName: string;
+  content: string;
+  sentAt: string;
+}
+
+export interface PostComment {
+  id: string;
+  platform: PlatformType;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  sentAt: string;
+  replies?: PostCommentReply[];
+}
+
 export interface ContentItem {
   id: string;
   workspaceId: string;
@@ -110,6 +127,8 @@ export interface ContentItem {
   mediaUrls: string[];
   campaignId?: string;
   approvalRequestId?: string;
+  commentsCount?: number;
+  comments?: PostComment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -132,6 +151,7 @@ export interface Campaign {
 export interface InboxConversation {
   id: string;
   workspaceId: string;
+  brandId?: string;
   socialAccountId: string;
   platform: PlatformType;
   type: "COMMENT" | "DIRECT_MESSAGE" | "MENTION";
@@ -145,6 +165,10 @@ export interface InboxConversation {
   tags: string[];
   lastActivityAt: string;
   assignedTo?: string;
+  postId?: string;
+  postTitle?: string;
+  postUrl?: string;
+  platformCommentId?: string;
   messages: {
     id: string;
     senderType: "CUSTOMER" | "AGENT" | "AI_DRAFT";
@@ -157,6 +181,8 @@ export interface InboxConversation {
 
 export interface ApprovalRequestItem {
   id: string;
+  workspaceId?: string;
+  brandId?: string;
   contentId: string;
   clientToken: string;
   state: ApprovalState;
